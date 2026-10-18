@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { createAnimal } from "./animals.js";
+import { createAnimal, getAnimalCenter } from "./animals.js";
 
 export function beginBreedingPulse(state) {
   const parents = state.animals.slice();
@@ -7,12 +7,13 @@ export function beginBreedingPulse(state) {
 
   state.pendingParents = parents;
   state.pendingBirthAt = state.elapsedMs + CONFIG.birthAnimationMs;
-  for (const parent of parents) parent.pulse = 1;
+  for (const parent of parents) parent.pulse = 0;
 }
 
 export function completeBreedingPulse(state) {
   const parents = state.pendingParents;
   if (parents.length === 0) {
+    state.pendingParents = [];
     state.pendingBirthAt = null;
     return 0;
   }
@@ -25,14 +26,19 @@ export function completeBreedingPulse(state) {
     if (!state.animals.includes(parent)) continue;
 
     // Newborns are absent from this snapshot, so they cannot breed in this pulse.
+    const origin = getAnimalCenter(parent, state.elapsedMs);
     const litterSize = randomInt(CONFIG.litterMin, CONFIG.litterMax);
     for (let litterIndex = 0; litterIndex < litterSize; litterIndex += 1) {
       if (state.animals.length >= CONFIG.maxAnimals) break;
       const point = chooseBirthPoint(parent, occupancy);
-      state.animals.push(createAnimal(parent.species, point.x, point.y));
+      state.animals.push(createAnimal(parent.species, point.x, point.y, {
+        fromX: origin.x,
+        fromY: origin.y,
+      }));
       addToOccupancy(occupancy, point.x, point.y);
       births += 1;
     }
+    parent.pulse = -1;
   }
 
   state.pendingParents = [];

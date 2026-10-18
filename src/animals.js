@@ -40,13 +40,14 @@ export const SPECIES = Object.freeze([
 
 export const SPECIES_BY_KEY = new Map(SPECIES.map((species) => [species.key, species]));
 
-export function createAnimal(species, x, y) {
+export function createAnimal(species, x, y, birthOrigin = null) {
   return {
     species,
     x,
     y,
     phase: Math.random() * Math.PI * 2,
-    pulse: 0,
+    pulse: null,
+    birth: birthOrigin ? { ...birthOrigin, elapsedMs: 0 } : null,
   };
 }
 
@@ -66,22 +67,66 @@ export async function loadAnimalSprites() {
 
 export function getAnimalCenter(animal, elapsedMs) {
   const seconds = elapsedMs / 1000;
+  const driftX = Math.sin(seconds * 0.57 + animal.phase) * 1.1;
+  const driftY = Math.sin(seconds * 1.5 + animal.phase) * 1.9;
+  if (animal.birth) {
+    const eased = easeOutCubic(getBirthProgress(animal));
+    return {
+      x: animal.birth.fromX + (animal.x - animal.birth.fromX) * eased + driftX,
+      y: animal.birth.fromY + (animal.y - animal.birth.fromY) * eased + driftY,
+    };
+  }
   return {
-    x: animal.x + Math.sin(seconds * 0.57 + animal.phase) * 1.1,
-    y: animal.y + Math.sin(seconds * 1.5 + animal.phase) * 1.9,
+    x: animal.x + driftX,
+    y: animal.y + driftY,
   };
 }
 
 export function getAnimalScale(animal, elapsedMs) {
   const idle = 1 + Math.sin(elapsedMs / 1000 * 1.5 + animal.phase) * 0.018;
-  const compression = Math.sin(animal.pulse * Math.PI) * 0.16;
-  return idle * (1 - compression);
+  if (animal.birth) return idle * (0.12 + 0.88 * easeOutCubic(getBirthProgress(animal)));
+  if (animal.pulse === null) return idle;
+  if (animal.pulse >= 0) return idle * (1 - 0.86 * easeInCubic(animal.pulse));
+  return idle * (0.14 + 0.86 * easeOutCubic(1 + animal.pulse));
+}
+
+export function getAnimalVisualProgress(animal) {
+  if (animal.birth) return { type: "birth", progress: getBirthProgress(animal) };
+  if (animal.pulse !== null) {
+    return animal.pulse >= 0
+      ? { type: "compress", progress: animal.pulse }
+      : { type: "release", progress: 1 + animal.pulse };
+  }
+  return null;
 }
 
 export function updateAnimalAnimations(animals, dt) {
   for (const animal of animals) {
-    animal.pulse = Math.max(0, animal.pulse - dt / 0.54);
+    if (animal.pulse !== null) {
+      if (animal.pulse >= 0) {
+        animal.pulse = Math.min(1, animal.pulse + (dt * 1000) / CONFIG.birthAnimationMs);
+      } else {
+        animal.pulse = Math.min(0, animal.pulse + (dt * 1000) / CONFIG.parentReleaseMs);
+        if (animal.pulse === 0) animal.pulse = null;
+      }
+    }
+    if (animal.birth) {
+      animal.birth.elapsedMs += dt * 1000;
+      if (animal.birth.elapsedMs >= CONFIG.birthAnimationMs) animal.birth = null;
+    }
   }
+}
+
+function getBirthProgress(animal) {
+  return Math.min(1, animal.birth.elapsedMs / CONFIG.birthAnimationMs);
+}
+
+function easeInCubic(value) {
+  return value * value * value;
+}
+
+function easeOutCubic(value) {
+  return 1 - (1 - value) ** 3;
 }
 
 export function findAnimalAt(animals, x, y, elapsedMs) {

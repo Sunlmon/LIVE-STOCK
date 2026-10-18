@@ -70,7 +70,7 @@ function frame(timestamp) {
     updateAnimalAnimations(state.animals, dt);
     updateParticles(state.particles, dt);
 
-    if (state.elapsedMs >= state.nextBreedAt) {
+    if (state.saturationPendingAt === null && state.elapsedMs >= state.nextBreedAt) {
       beginBreedingPulse(state);
       state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
     }
@@ -79,7 +79,10 @@ function frame(timestamp) {
     }
 
     state.density = measureDensity(state.animals);
-    if (isScreenSaturated(state)) {
+    if (state.saturationPendingAt === null && isScreenSaturated(state)) {
+      state.saturationPendingAt = state.elapsedMs + CONFIG.saturationTransitionDelayMs;
+    }
+    if (state.saturationPendingAt !== null && state.elapsedMs >= state.saturationPendingAt) {
       state.mode = "placeholder";
       placeholder.hidden = false;
     }

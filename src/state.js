@@ -11,6 +11,7 @@ export function createState() {
     nextBreedAt: CONFIG.breedIntervalMs,
     pendingParents: [],
     pendingBirthAt: null,
+    saturationPendingAt: null,
     lastHudUpdateAt: 0,
     density: 0,
   };
@@ -25,6 +26,7 @@ export function startRound(state) {
   state.nextBreedAt = CONFIG.breedIntervalMs;
   state.pendingParents = [];
   state.pendingBirthAt = null;
+  state.saturationPendingAt = null;
   state.lastHudUpdateAt = 0;
   state.density = 0;
 }
