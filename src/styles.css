@@ -1,0 +1,273 @@
+:root {
+  color-scheme: light;
+  --paper: #f1efe8;
+  --ink: #282a27;
+  --muted: #8d8e86;
+  --line: #bdbdb4;
+  --amber: #d6a34f;
+  --red: #b84940;
+  font-family: "Aptos", "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+main {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 5px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.intro-screen {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-content: center;
+  justify-items: center;
+  gap: clamp(22px, 4vh, 42px);
+  padding: 32px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.eyebrow span {
+  color: var(--amber);
+}
+
+.intro-screen h1 {
+  margin: 0;
+  font-size: clamp(52px, 10vw, 124px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+}
+
+.start-button,
+.restart-button {
+  display: inline-flex;
+  min-width: 136px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 14px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.start-button:hover,
+.restart-button:hover {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.start-button span:last-child {
+  color: var(--amber);
+}
+
+.play-screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+#animal-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+  cursor: crosshair;
+}
+
+.hud {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(18px, 3vw, 42px);
+  pointer-events: none;
+}
+
+.hud-title h2 {
+  margin: 7px 0 5px;
+  font-size: clamp(22px, 2.3vw, 32px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hud-data {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(18px, 3vw, 44px);
+}
+
+.counter {
+  display: grid;
+  gap: 4px;
+  min-width: 54px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-align: right;
+}
+
+.counter strong {
+  color: var(--ink);
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.counter.adopted strong {
+  color: var(--amber);
+}
+
+.density-meter {
+  display: grid;
+  width: clamp(90px, 12vw, 150px);
+  gap: 7px;
+  padding-top: 2px;
+}
+
+.density-label {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.density-track {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  background: #deddd5;
+}
+
+.density-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--red);
+  transition: width 180ms linear;
+}
+
+.stage-placeholder {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 32px;
+  background: rgb(241 239 232 / 94%);
+  text-align: center;
+}
+
+.stage-placeholder h2 {
+  margin: 0;
+  font-size: clamp(38px, 7vw, 76px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.stage-placeholder > p:not(.eyebrow) {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.load-error {
+  position: absolute;
+  z-index: 4;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+  margin: 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--red);
+  background: var(--paper);
+  font-size: 13px;
+}
+
+@media (max-width: 620px) {
+  .hud {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hud-data {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .density-meter {
+    width: 72px;
+  }
+
+  .counter strong {
+    font-size: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

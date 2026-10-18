@@ -1,0 +1,33 @@
+export const CONFIG = Object.freeze({
+  logicalWidth: 1920,
+  logicalHeight: 1080,
+  animalDiameter: 26,
+  initialPerSpecies: 5,
+  breedIntervalMs: 3200,
+  birthAnimationMs: 480,
+  litterMin: 4,
+  litterMax: 6,
+  maxAnimals: 920,
+  saturationAnimalCount: 780,
+  densityCellSize: 64,
+  saturationDensity: 0.7,
+  safeTop: 128,
+  safeBottom: 54,
+  birthSpreadMin: 32,
+  birthSpreadMax: 164,
+  birthPlacementAttempts: 10,
+  adoptionParticleCount: 8,
+  maxParticles: 2400,
+  particleLifeMin: 0.38,
+  particleLifeMax: 0.66,
+  maxDevicePixelRatio: 2,
+});
+
+export const COLORS = Object.freeze({
+  paper: "#F1EFE8",
+  ink: "#282A27",
+  muted: "#8D8E86",
+  line: "#BDBDB4",
+  amber: "#D6A34F",
+  red: "#B84940",
+});

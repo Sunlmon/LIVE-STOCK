@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F1EFE8" />
+    <title>活体滞销 — 清空屏幕</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main>
+      <section class="intro-screen" id="intro-screen" aria-labelledby="intro-title">
+        <p class="eyebrow">LIVE STOCK <span>／</span> WIP 01</p>
+        <h1 id="intro-title">清空屏幕</h1>
+        <button class="start-button" id="start-button" type="button">
+          <span>开始</span><span aria-hidden="true">↗</span>
+        </button>
+      </section>
+
+      <section class="play-screen" id="play-screen" hidden aria-label="清空屏幕互动场景">
+        <canvas id="animal-canvas" aria-label="点击动物，尝试将它们领养离开"></canvas>
+
+        <header class="hud" aria-live="polite">
+          <div class="hud-title">
+            <p class="eyebrow">LIVE STOCK <span>／</span> 01</p>
+            <h2>清空屏幕</h2>
+            <p class="hint">点击动物，尝试全部领养。</p>
+          </div>
+          <div class="hud-data">
+            <div class="counter"><span>屏幕中</span><strong id="animal-count">0</strong></div>
+            <div class="counter adopted"><span>已领养</span><strong id="adopted-count">0</strong></div>
+            <div class="density-meter" aria-label="画面密度">
+              <span class="density-label">画面密度</span>
+              <span class="density-track"><span id="density-fill"></span></span>
+            </div>
+          </div>
+        </header>
+
+        <div class="stage-placeholder" id="stage-placeholder" hidden>
+          <p class="eyebrow">LIVE STOCK <span>／</span> WIP 02</p>
+          <h2>分流装置</h2>
+          <p>下一阶段原型尚未实现</p>
+          <button class="restart-button" id="restart-button" type="button">重新开始</button>
+        </div>
+
+        <p class="load-error" id="load-error" role="alert" hidden>
+          动物图形未能载入。请通过本地网页服务器重新打开页面。
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
