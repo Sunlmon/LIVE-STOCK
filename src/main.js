@@ -1,9 +1,10 @@
 import { CONFIG } from "./config.js";
-import { loadAnimalSprites, findAnimalAt, updateAnimalAnimations } from "./animals.js";
-import { beginBreedingPulse, completeBreedingPulse, measureDensity, isScreenSaturated } from "./breeding.js";
+import { SPECIES, loadAnimalSprites, findAnimalAt, updateAnimalAnimations } from "./animals.js";
+import { beginBreedingPulse, advanceBreedingPulse, measureDensity, isScreenSaturated } from "./breeding.js";
 import { createCanvasRenderer } from "./canvas-renderer.js";
 import { adoptAnimal, updateParticles } from "./particles.js";
 import { createState, startRound } from "./state.js";
+import { isPackingSettled } from "./packing.js";
 
 const introScreen = document.querySelector("#intro-screen");
 const playScreen = document.querySelector("#play-screen");
@@ -15,11 +16,20 @@ const loadError = document.querySelector("#load-error");
 const animalCount = document.querySelector("#animal-count");
 const adoptedCount = document.querySelector("#adopted-count");
 const densityFill = document.querySelector("#density-fill");
+const coverAnimals = document.querySelector("#cover-animals");
+
+if (coverAnimals) {
+  coverAnimals.innerHTML = SPECIES.map((species, index) =>
+    `<span class="cover-animal cover-animal-${index}" style="--float-delay:${index * -0.7}s">${species.svg}</span>`,
+  ).join("");
+}
 
 const state = createState();
 let sprites = new Map();
 let renderer;
 let previousFrameAt = 0;
+let introIsLeaving = false;
+let introExitStartedAt = null;
 
 try {
   sprites = await loadAnimalSprites();
@@ -42,14 +52,21 @@ canvas.addEventListener("pointerdown", (event) => {
 });
 
 function beginRound() {
-  if (!renderer) return;
+  if (!renderer || introIsLeaving) return;
+  const fromCover = !introScreen.hidden;
   startRound(state);
-  introScreen.hidden = true;
   playScreen.hidden = false;
+  if (fromCover) {
+    introIsLeaving = true;
+    introExitStartedAt = null;
+    startButton.disabled = true;
+    introScreen.classList.add("is-leaving");
+  }
   // The canvas lives inside a hidden section during initial loading, so its first
   // measured size is 0×0. Re-measure after revealing the play screen.
   renderer.resize();
   placeholder.hidden = true;
+  placeholder.classList.remove("is-visible");
   previousFrameAt = 0;
   updateHud(true);
 }
@@ -62,38 +79,88 @@ function updateHud(force = false) {
 }
 
 function frame(timestamp) {
-  const dt = previousFrameAt === 0 ? 0 : Math.min((timestamp - previousFrameAt) / 1000, 0.05);
-  previousFrameAt = timestamp;
+  try {
+    const dt = previousFrameAt === 0 ? 0 : Math.min((timestamp - previousFrameAt) / 1000, 0.05);
+    previousFrameAt = timestamp;
 
-  if (state.mode === "active") {
-    state.elapsedMs += dt * 1000;
-    updateAnimalAnimations(state.animals, dt);
-    updateParticles(state.particles, dt);
-
-    if (state.saturationPendingAt === null && state.elapsedMs >= state.nextBreedAt) {
-      beginBreedingPulse(state);
-      state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
-    }
-    if (state.pendingBirthAt !== null && state.elapsedMs >= state.pendingBirthAt) {
-      completeBreedingPulse(state);
-    }
-
-    state.density = measureDensity(state.animals);
-    if (state.saturationPendingAt === null && isScreenSaturated(state)) {
-      state.saturationPendingAt = state.elapsedMs + CONFIG.saturationTransitionDelayMs;
-    }
-    if (state.saturationPendingAt !== null && state.elapsedMs >= state.saturationPendingAt) {
-      state.mode = "placeholder";
-      placeholder.hidden = false;
+    if (introIsLeaving) {
+      introExitStartedAt ??= timestamp;
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      if (reducedMotion || timestamp - introExitStartedAt >= CONFIG.introTransitionMs) {
+        introScreen.hidden = true;
+        introScreen.classList.remove("is-leaving");
+        introIsLeaving = false;
+        startButton.disabled = false;
+      }
     }
 
-    if (state.elapsedMs - state.lastHudUpdateAt >= 100) {
-      updateHud(true);
+    if (state.mode === "active" && !introIsLeaving) {
+      state.elapsedMs += dt * 1000;
+      updateAnimalAnimations(state.animals, dt);
+      updateParticles(state.particles, dt);
+
+      state.density = measureDensity(state.animals);
+      // Keep icon size fixed: leave when the screen is full, even before wave six.
+      const screenIsFull = isScreenSaturated(state);
+      // Adoption or redistribution can open room again during the full-screen hold.
+      if (!screenIsFull) state.saturationPendingAt = null;
+
+      if (
+        state.saturationPendingAt === null && !screenIsFull &&
+        state.pendingBirthAt === null && state.elapsedMs >= state.nextBreedAt &&
+        state.elapsedMs >= state.breedingBusyUntil
+      ) {
+        if (!beginBreedingPulse(state)) state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
+      }
+      if (state.pendingBirthAt !== null && state.elapsedMs >= state.pendingBirthAt) {
+        advanceBreedingPulse(state);
+      }
+
+      if (state.saturationPendingAt === null && screenIsFull) {
+        state.saturationPendingAt = state.elapsedMs + CONFIG.saturationTransitionDelayMs;
+      }
+      // Let in-flight offspring finish before the stage change so their movement
+      // is not cut off by the overlay.
+      if (
+        state.saturationPendingAt !== null &&
+        state.elapsedMs >= state.saturationPendingAt &&
+        state.elapsedMs >= state.breedingBusyUntil &&
+        state.pendingBirthAt === null &&
+        !state.animals.some((animal) => animal.birth && !animal.birth.complete) &&
+        (
+          isPackingSettled(state.animals, false) ||
+          state.elapsedMs >= state.saturationPendingAt + CONFIG.saturationMaxSettleMs
+        )
+      ) {
+        state.mode = "placeholder";
+        placeholder.hidden = false;
+        placeholder.classList.remove("is-visible");
+        requestAnimationFrame(() => placeholder.classList.add("is-visible"));
+      }
+
+      if (state.elapsedMs - state.lastHudUpdateAt >= 100) {
+        updateHud(true);
+      }
     }
+
+    renderer?.render(state);
+  } catch (error) {
+    // A single bad reproduction frame should not stop requestAnimationFrame
+    // forever and leave every parent frozen as a black dot.
+    console.error("动画帧出错，已恢复繁殖动画：", error);
+    state.pendingParents = [];
+    state.pendingParentIndex = 0;
+    state.pendingBirthAt = null;
+    state.breedingBusyUntil = state.elapsedMs;
+    state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
+    try {
+      renderer?.render(state);
+    } catch (renderError) {
+      console.error("Canvas 绘制失败：", renderError);
+    }
+  } finally {
+    requestAnimationFrame(frame);
   }
-
-  renderer?.render(state);
-  requestAnimationFrame(frame);
 }
 
 requestAnimationFrame(frame);

@@ -10,11 +10,33 @@
   <body>
     <main>
       <section class="intro-screen" id="intro-screen" aria-labelledby="intro-title">
-        <p class="eyebrow">LIVE STOCK <span>／</span> WIP 01</p>
-        <h1 id="intro-title">清空屏幕</h1>
-        <button class="start-button" id="start-button" type="button">
-          <span>开始</span><span aria-hidden="true">↗</span>
-        </button>
+        <header class="cover-header">
+          <p class="eyebrow">AN INTERACTIVE EXPERIENCE <span>／</span> 01</p>
+          <span class="cover-edition">SIX SPECIES · ONE SCREEN</span>
+        </header>
+        <div class="cover-content">
+          <div class="cover-copy">
+            <p class="cover-kicker">活 体 滞 销</p>
+            <h1 id="intro-title">LIVE<br />STOCK<span class="title-period">.</span></h1>
+            <p class="cover-description">一次关于「清空」的互动实验。</p>
+            <div class="cover-action">
+              <button class="start-button" id="start-button" type="button">
+                <span>START</span><span class="start-arrow" aria-hidden="true">↗</span>
+              </button>
+              <p class="cover-start-hint">点击，开始领养</p>
+            </div>
+          </div>
+          <div class="cover-art" aria-hidden="true">
+            <div class="cover-orbit orbit-outer"></div>
+            <div class="cover-orbit orbit-inner"></div>
+            <div class="cover-animals" id="cover-animals"></div>
+            <span class="cover-art-caption">EVERY LITTLE LIFE.</span>
+          </div>
+        </div>
+        <footer class="cover-footer">
+          <span>点击领养 · 看它们不断生长</span>
+          <span>LIVE STOCK <span class="footer-dash">—</span> 活体滞销</span>
+        </footer>
       </section>
 
       <section class="play-screen" id="play-screen" hidden aria-label="清空屏幕互动场景">
@@ -24,7 +46,7 @@
           <div class="hud-title">
             <p class="eyebrow">LIVE STOCK <span>／</span> 01</p>
             <h2>清空屏幕</h2>
-            <p class="hint">点击动物，尝试全部领养。</p>
+            <p class="hint">通过点击将小动物都领养出去</p>
           </div>
           <div class="hud-data">
             <div class="counter"><span>屏幕中</span><strong id="animal-count">0</strong></div>
@@ -38,8 +60,7 @@
 
         <div class="stage-placeholder" id="stage-placeholder" hidden>
           <p class="eyebrow">LIVE STOCK <span>／</span> WIP 02</p>
-          <h2>分流装置</h2>
-          <p>下一阶段原型尚未实现</p>
+          <h2>动物数量太多了，<br />已经超越承受能力了。</h2>
           <button class="restart-button" id="restart-button" type="button">重新开始</button>
         </div>
 

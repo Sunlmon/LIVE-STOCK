@@ -1,5 +1,5 @@
 import { CONFIG, COLORS } from "./config.js";
-import { getAnimalCenter, getAnimalScale, getAnimalVisualProgress } from "./animals.js";
+import { getAnimalCenter, getAnimalScale } from "./animals.js";
 
 export function createCanvasRenderer(canvas, sprites) {
   const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -42,32 +42,41 @@ export function createCanvasRenderer(canvas, sprites) {
     const radius = CONFIG.animalDiameter / 2;
     context.lineWidth = 1.25;
 
-    for (const animal of animals) {
-      const center = getAnimalCenter(animal, elapsedMs);
-      const scale = getAnimalScale(animal, elapsedMs);
-      const visual = getAnimalVisualProgress(animal);
-      const diameter = CONFIG.animalDiameter * scale;
-      const scaledRadius = radius * scale;
+    // Render newborns first so a parent remains visible above its overlapping litter.
+    for (let pass = 0; pass < 2; pass += 1) {
+      for (const animal of animals) {
+        const inFlight = animal.birth && !animal.birth.complete;
+        if ((pass === 0) !== Boolean(inFlight)) continue;
 
-      context.beginPath();
-      context.arc(center.x, center.y, scaledRadius, 0, Math.PI * 2);
-      context.fillStyle = visual ? getTransitionFill(visual) : COLORS.paper;
-      context.fill();
-      context.strokeStyle = COLORS.ink;
-      context.stroke();
+        const center = getAnimalCenter(animal, elapsedMs);
+        const scale = getAnimalScale(animal, elapsedMs);
+        const diameter = CONFIG.animalDiameter * scale;
+        const scaledRadius = radius * scale;
 
-      const image = sprites.get(animal.species);
-      if (image?.complete && image.naturalWidth > 0) {
-        const imageSize = diameter * 0.76;
-        context.globalAlpha = visual ? getSpriteAlpha(visual) : 1;
-        context.drawImage(
-          image,
-          center.x - imageSize / 2,
-          center.y - imageSize / 2,
-          imageSize,
-          imageSize,
-        );
-        context.globalAlpha = 1;
+        context.beginPath();
+        context.arc(center.x, center.y, scaledRadius, 0, Math.PI * 2);
+        context.fillStyle = COLORS.paper;
+        context.fill();
+        context.strokeStyle = COLORS.ink;
+        context.stroke();
+
+        const image = sprites.get(animal.species);
+        if (image?.complete && image.naturalWidth > 0) {
+          const imageSize = diameter * 0.76;
+          context.save();
+          context.beginPath();
+          context.arc(center.x, center.y, scaledRadius - 0.5, 0, Math.PI * 2);
+          context.clip();
+          context.drawImage(
+            image,
+            center.x - imageSize / 2,
+            center.y - imageSize / 2,
+            imageSize,
+            imageSize,
+          );
+          context.restore();
+          context.globalAlpha = 1;
+        }
       }
     }
   }
@@ -96,28 +105,4 @@ export function createCanvasRenderer(canvas, sprites) {
 
   resize();
   return { render, resize, pointerToLogical };
-}
-
-function getTransitionFill(visual) {
-  if (visual.type === "compress") return mixColor(COLORS.paper, COLORS.ink, visual.progress);
-  if (visual.type === "release") return mixColor(COLORS.ink, COLORS.paper, visual.progress);
-  const reveal = clamp((visual.progress - 0.22) / 0.78, 0, 1);
-  return mixColor(COLORS.ink, COLORS.paper, reveal);
-}
-
-function getSpriteAlpha(visual) {
-  if (visual.type === "compress") return 1 - visual.progress;
-  if (visual.type === "release") return visual.progress;
-  return clamp((visual.progress - 0.34) / 0.5, 0, 1);
-}
-
-function mixColor(start, end, amount) {
-  const a = Number.parseInt(start.slice(1), 16);
-  const b = Number.parseInt(end.slice(1), 16);
-  const channel = (shift) => Math.round(((a >> shift) & 255) * (1 - amount) + ((b >> shift) & 255) * amount);
-  return `rgb(${channel(16)} ${channel(8)} ${channel(0)})`;
-}
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
 }
