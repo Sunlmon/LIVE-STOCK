@@ -54,13 +54,15 @@ test("rounded displayed percentages sum to 100.0%, including small and empty sam
 test("the reveal follows hold, fade, fate symbols, skulls, and individual disappearance continuously", () => {
   const reveal = createReveal(population(120), seeded(3));
   const positions = JSON.stringify(reveal.items);
-  const startDissolve = R.holdMs + R.fadeMs + R.symbolsMs + R.skullsMs;
+  const symbolsReady = R.holdMs + R.fadeMs + R.symbolsMs;
+  const skullsStart = symbolsReady + R.symbolsHoldMs;
+  const startDissolve = skullsStart + R.skullsMs;
   assert.equal(revealVisualAt(0).animal, 1);
   assert.equal(revealVisualAt(R.holdMs / 2).phase, "hold");
   assert.ok(revealVisualAt(R.holdMs + R.fadeMs / 2).animal < 1);
   assert.ok(revealVisualAt(R.holdMs + R.fadeMs + R.symbolsMs / 2).fate > 0);
   assert.ok(revealVisualAt(startDissolve - R.skullsMs / 2).skull > 0);
-  for (const time of [R.holdMs, R.holdMs + R.fadeMs, R.holdMs + R.fadeMs + R.symbolsMs, startDissolve]) {
+  for (const time of [R.holdMs, R.holdMs + R.fadeMs, symbolsReady, skullsStart, startDissolve]) {
     const a = revealVisualAt(time - 0.001), b = revealVisualAt(time);
     for (const key of ["animal", "fate", "skull"]) assert.ok(Math.abs(a[key] - b[key]) < 0.0001);
   }
@@ -75,6 +77,23 @@ test("the reveal follows hold, fade, fate symbols, skulls, and individual disapp
   const endTime = reveal.elapsedMs; updateReveal(reveal, 1 / 60);
   assert.equal(reveal.elapsedMs, endTime);
   assert.equal(JSON.stringify(reveal.items), positions);
+});
+
+test("completed fate icons remain fully visible for 2.5 seconds before any skull appears", () => {
+  const start = R.holdMs + R.fadeMs + R.symbolsMs;
+  assert.ok(R.symbolsHoldMs >= 2000 && R.symbolsHoldMs <= 3000);
+  for (let elapsed = 0; elapsed < R.symbolsHoldMs; elapsed += 17) {
+    const visual = revealVisualAt(start + elapsed);
+    assert.equal(visual.phase, "fates");
+    assert.equal(visual.animal, 0);
+    assert.equal(visual.fate, 1);
+    assert.equal(visual.skull, 0);
+    assert.equal(visual.dissolveMs, -1);
+  }
+  const transition = revealVisualAt(start + R.symbolsHoldMs + R.skullsMs / 2);
+  assert.equal(transition.phase, "skulls");
+  assert.ok(transition.fate > 0 && transition.fate < 1);
+  assert.ok(transition.skull > 0 && transition.skull < 1);
 });
 
 test("empty and one-animal snapshots complete without NaNs or an undefined fate", () => {

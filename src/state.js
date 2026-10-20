@@ -1,5 +1,6 @@
 import { CONFIG } from "./config.js";
 import { SPECIES, createAnimal } from "./animals.js";
+import { isScreenSaturated, getPopulationLimit } from "./breeding.js";
 
 export function createState() {
   return {
@@ -17,7 +18,6 @@ export function createState() {
     pendingParents: [],
     pendingParentIndex: 0,
     pendingBirthAt: null,
-    saturationPendingAt: null,
     capacityElapsedMs: 0,
     lastHudUpdateAt: 0,
     density: 0,
@@ -54,14 +54,29 @@ export function startRound(state) {
   state.pendingParents = [];
   state.pendingParentIndex = 0;
   state.pendingBirthAt = null;
-  state.saturationPendingAt = null;
   state.capacityElapsedMs = 0;
   state.lastHudUpdateAt = 0;
   state.density = 0;
 }
 
+export function beginStageOneFinish(state) {
+  if (state.mode !== "active" ||
+    (!isScreenSaturated(state) && state.animals.length < getPopulationLimit())) return false;
+  // Latch once: falling density during redistribution must not re-enable input.
+  state.mode = "finishing";
+  return true;
+}
+
+export function isStageOneFinishReady(state) {
+  return state.mode === "finishing" && state.pendingBirthAt === null &&
+    state.pendingParents.length === 0 &&
+    !state.animals.some(animal => animal.birth && !animal.birth.complete);
+}
+
 export function beginCapacityNotice(state) {
-  if (state.mode !== "active") return false;
+  // Keep the existing active-state development preview, but never skip a live
+  // final wave when entering from the real finishing state.
+  if (state.mode !== "active" && !isStageOneFinishReady(state)) return false;
   state.mode = "capacity";
   state.capacityElapsedMs = 0;
   return true;

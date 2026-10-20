@@ -52,7 +52,7 @@ export function createCanvasRenderer(canvas, sprites, { physicsHud } = {}) {
     context.translate(viewport.offsetX, viewport.offsetY);
     context.scale(viewport.scale, viewport.scale);
 
-    if (state.mode === "active" || state.mode === "capacity") {
+    if (state.mode === "active" || state.mode === "finishing" || state.mode === "capacity") {
       drawAnimals(state.animals, state.elapsedMs);
       drawParticles(state.particles);
     } else if (state.mode === "reveal" && state.reveal) {

@@ -12,18 +12,21 @@
       <section class="intro-screen" id="intro-screen" aria-labelledby="intro-title">
         <header class="cover-header">
           <p class="eyebrow">AN INTERACTIVE EXPERIENCE <span>／</span> 01</p>
-          <span class="cover-edition">SIX SPECIES · ONE SCREEN</span>
+          <div class="cover-tools">
+            <span class="cover-edition">SIX SPECIES · ONE SCREEN</span>
+            <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
+          </div>
         </header>
         <div class="cover-content">
           <div class="cover-copy">
-            <p class="cover-kicker">活 体 滞 销</p>
+            <p class="cover-kicker" data-i18n="cover.kicker">活 体 滞 销</p>
             <h1 id="intro-title">LIVE<br />STOCK<span class="title-period">.</span></h1>
-            <p class="cover-description">一次关于「清空」的互动实验。</p>
+            <p class="cover-description" data-i18n="cover.description">一次关于「清空」的互动实验。</p>
             <div class="cover-action">
               <button class="start-button" id="start-button" type="button">
                 <span>START</span><span class="start-arrow" aria-hidden="true">↗</span>
               </button>
-              <p class="cover-start-hint">点击，开始领养</p>
+              <p class="cover-start-hint" data-i18n="cover.hint">点击，开始领养</p>
             </div>
           </div>
           <div class="cover-art" aria-hidden="true">
@@ -34,25 +37,28 @@
           </div>
         </div>
         <footer class="cover-footer">
-          <span>点击领养 · 看它们不断生长</span>
-          <span>LIVE STOCK <span class="footer-dash">—</span> 活体滞销</span>
+          <span data-i18n="cover.footer">点击领养 · 看它们不断生长</span>
+          <span data-i18n="cover.brand">LIVE STOCK — 活体滞销</span>
         </footer>
       </section>
 
-      <section class="play-screen" id="play-screen" hidden aria-label="清空屏幕互动场景">
+      <section class="play-screen" id="play-screen" hidden data-i18n-aria-label="canvas.scene" aria-label="清空屏幕互动场景">
         <canvas id="animal-canvas" aria-label="点击动物，尝试将它们领养离开"></canvas>
 
         <header class="hud" id="stage-one-hud" aria-live="polite">
           <div class="hud-title">
-            <p class="eyebrow">LIVE STOCK <span>／</span> 01</p>
-            <h2>清空屏幕</h2>
-            <p class="hint">通过点击将小动物都领养出去</p>
+            <div class="hud-stage-line">
+              <p class="eyebrow">LIVE STOCK <span>／</span> 01</p>
+              <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
+            </div>
+            <h2 data-i18n="stageOne.title">清空屏幕</h2>
+            <p class="hint" data-i18n="stageOne.hint">通过点击将小动物都领养出去</p>
           </div>
           <div class="hud-data">
-            <div class="counter"><span>屏幕中</span><strong id="animal-count">0</strong></div>
-            <div class="counter adopted"><span>已领养</span><strong id="adopted-count">0</strong></div>
-            <div class="density-meter" aria-label="画面密度">
-              <span class="density-label">画面密度</span>
+            <div class="counter"><span data-i18n="stageOne.onScreen">屏幕中</span><strong id="animal-count">0</strong></div>
+            <div class="counter adopted"><span data-i18n="stageOne.adopted">已领养</span><strong id="adopted-count">0</strong></div>
+            <div class="density-meter" data-i18n-aria-label="stageOne.density" aria-label="画面密度">
+              <span class="density-label" data-i18n="stageOne.density">画面密度</span>
               <span class="density-track"><span id="density-fill"></span></span>
             </div>
           </div>
@@ -61,56 +67,68 @@
         <header class="physics-hud" id="physics-hud" hidden>
           <div>
             <p class="eyebrow">LIVE STOCK <span>／</span> 02</p>
-            <p class="physics-hint" id="physics-status" role="status">向下拖过金色刻度，选择不同深度后松开发射。</p>
+            <p class="physics-hint" id="physics-status" role="status" data-i18n="physics.ready">向下拖过金色刻度，选择不同深度后松开发射。</p>
           </div>
           <div class="physics-controls">
+            <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
             <span class="physics-progress" id="physics-progress" aria-live="polite">已发射 0 / 4</span>
-            <button class="physics-button" id="physics-retry" type="button" hidden>重新体验</button>
-            <button class="physics-button" id="restart-button" type="button">重新开始</button>
+            <button class="physics-button" id="physics-retry" type="button" data-i18n="button.retry" hidden>重新体验</button>
+            <button class="physics-button" id="restart-button" type="button" data-i18n="button.restart">重新开始</button>
           </div>
         </header>
 
         <section class="stage-placeholder" id="capacity-screen" role="dialog" aria-modal="true" aria-labelledby="capacity-title" aria-describedby="capacity-description" hidden>
+          <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
           <p class="eyebrow">LIVE STOCK <span>／</span> CAPACITY EXCEEDED</p>
-          <h2 id="capacity-title">动物数量太多了，<br />已经超出承受能力。</h2>
-          <p id="capacity-description">领养的速度，已经追不上繁育的速度。</p>
+          <h2 id="capacity-title"><span data-i18n="capacity.lineOne">动物数量太多了，</span><br /><span data-i18n="capacity.lineTwo">已经超出承受能力。</span></h2>
+          <p id="capacity-description" data-i18n="capacity.description">领养的速度，已经追不上繁育的速度。</p>
           <div class="capacity-actions">
-            <button class="capacity-continue" id="capacity-continue" type="button">进入分流装置 →</button>
-            <button class="physics-button" id="capacity-restart" type="button">重新开始</button>
+            <button class="capacity-continue" id="capacity-continue" type="button" data-i18n="capacity.continue">进入分流装置 →</button>
+            <button class="physics-button" id="capacity-restart" type="button" data-i18n="button.restart">重新开始</button>
           </div>
-          <p class="capacity-timing">稍后自动进入，也可点击继续。</p>
+          <p class="capacity-timing" data-i18n="capacity.timing">稍后自动进入，也可点击继续。</p>
         </section>
 
         <header class="reveal-hud" id="reveal-hud" hidden>
-          <p class="eyebrow">LIVE STOCK <span>／</span> 03 · 本轮模拟</p>
-          <button class="physics-button" id="reveal-restart" type="button">重新开始</button>
+          <p class="eyebrow">LIVE STOCK <span>／</span> <span class="reveal-badge" data-i18n="reveal.badge">03 · 本轮模拟</span></p>
+          <div class="reveal-controls">
+            <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
+            <button class="physics-button" id="reveal-restart" type="button" data-i18n="button.restart">重新开始</button>
+          </div>
           <p class="sr-only" id="reveal-status" role="status"></p>
         </header>
 
-        <p class="load-error" id="load-error" role="alert" hidden>
+        <p class="load-error" id="load-error" role="alert" data-i18n="load.error" hidden>
           动物图形未能载入。请通过本地网页服务器重新打开页面。
         </p>
       </section>
 
       <section class="ending-screen" id="ending-screen" hidden tabindex="-1" aria-labelledby="ending-title">
         <div class="ending-content">
-          <p class="eyebrow">LIVE STOCK <span>／</span> 活体滞销</p>
+          <header class="ending-header">
+            <p class="eyebrow">LIVE STOCK <span>／</span> <span class="ending-brand" data-i18n="ending.brand">活体滞销</span></p>
+            <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
+          </header>
           <div class="ending-copy">
-            <h1 id="ending-title">屏幕终于清空了。</h1>
-            <p>但那些生命，并没有因此消失。</p>
-            <p>当繁育不断继续，</p>
-            <p>没有被市场选择的生命，最终去了哪里？</p>
+            <h1 id="ending-title" data-i18n="ending.title">屏幕终于清空了。</h1>
+            <p data-i18n="ending.lineTwo">但那些生命，并没有因此消失。</p>
+            <p data-i18n="ending.lineThree">当繁育不断继续，</p>
+            <p data-i18n="ending.lineFour">没有被市场选择的生命，最终去了哪里？</p>
           </div>
           <section class="ending-results" aria-labelledby="result-title">
-            <h2 id="result-title">本轮模拟结果</h2>
+            <h2 id="result-title" data-i18n="ending.resultTitle">本轮模拟结果</h2>
             <p class="ending-note" id="result-summary"></p>
             <ul class="result-grid" id="simulated-results"></ul>
-            <p class="ending-note">四类等权的创作模拟参数，不是现实统计或发生率。每轮可能不同，某类也可能为零。</p>
+            <p class="ending-note" data-i18n="ending.weights">四类等权的创作模拟参数，不是现实统计或发生率。每轮可能不同，某类也可能为零。</p>
             <p class="ending-note" id="physical-summary"></p>
-            <p class="ending-note">骷髅转化为视觉隐喻；“继续繁育”不等同于死亡。</p>
+            <p class="ending-note" data-i18n="ending.metaphor">骷髅转化为视觉隐喻；“继续繁育”不等同于死亡。</p>
+            <div class="ending-context" data-i18n-aria-label="ending.contextLabel" aria-label="关于模拟数据的说明">
+              <p data-i18n="ending.contextOne">我无法为这些去向给出确切的发生概率。本作品未采用能够覆盖各类宠物、持续追踪未被领养个体去向的可靠数据，因此，这里的数字只是创作模拟，不代表现实中的比例。</p>
+              <p data-i18n="ending.contextTwo">猫、狗、兔子、仓鼠、鸟和金鱼……当它们没有被领养，我仍想追问：后来发生了什么？让人心痛的，不只是它们离开了屏幕，而是它们的去向，可能始终没有进入我们的视线。</p>
+            </div>
           </section>
-          <p class="ending-note" id="ending-error" role="alert" hidden>结尾动画未能完整播放。已保留本轮模拟结果，你可以重新开始。</p>
-          <button class="ending-restart" id="ending-restart" type="button">重新开始 ↗</button>
+          <p class="ending-note" id="ending-error" role="alert" data-i18n="ending.error" hidden>结尾动画未能完整播放。已保留本轮模拟结果，你可以重新开始。</p>
+          <button class="ending-restart" id="ending-restart" type="button" data-i18n="button.endingRestart">重新开始 ↗</button>
         </div>
       </section>
     </main>

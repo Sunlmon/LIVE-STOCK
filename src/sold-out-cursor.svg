@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="96" height="48" viewBox="0 0 96 48">
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="36" viewBox="0 0 96 48">
   <g transform="rotate(-9 48 24)" fill="#B84940">
     <rect x="4" y="8" width="88" height="32" rx="2" fill="#F1EFE8" fill-opacity="0.94" stroke="#B84940" stroke-width="2.3"/>
     <rect x="8" y="12" width="80" height="24" rx="0.5" fill="none" stroke="#B84940" stroke-width="0.8"/>
-    <text x="48" y="29" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="800" letter-spacing="0.6">Adopted</text>
+    <text x="48" y="30" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="800" letter-spacing="0.3">Adopted</text>
   </g>
 </svg>

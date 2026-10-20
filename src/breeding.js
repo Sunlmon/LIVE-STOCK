@@ -1,8 +1,16 @@
 import { CONFIG } from "./config.js";
 import { createAnimal, getAnimalCenter } from "./animals.js";
 
+export function getBreedingTiming(waveNumber) {
+  const factor = CONFIG.breedIntervalDecay ** Math.max(0, waveNumber - 1);
+  return {
+    intervalMs: Math.max(CONFIG.breedIntervalMinMs, CONFIG.breedIntervalMs * factor),
+    recoveryMs: Math.max(CONFIG.breedingRecoveryMinMs, CONFIG.breedingRecoveryMs * factor),
+  };
+}
+
 export function beginBreedingPulse(state) {
-  if (state.pendingBirthAt !== null || state.elapsedMs < state.breedingBusyUntil) return false;
+  if (state.mode !== "active" || state.pendingBirthAt !== null || state.elapsedMs < state.breedingBusyUntil) return false;
   // Every animal present at the start is eligible, regardless of growth state.
   // Use a snapshot so this wave's own newborns cannot recursively join its queue.
   const parents = [...state.animals];
@@ -36,16 +44,21 @@ export function beginBreedingPulse(state) {
   state.breedRound = waveNumber;
   state.waveParentsStarted = 0;
   const tailMs = (CONFIG.litterMax - 1) * CONFIG.birthStaggerMs + CONFIG.childSpreadMs;
+  const timing = getBreedingTiming(waveNumber);
+  // Shorten the scheduling window, never the offspring's continuous movement.
+  // Keep the final litter's full animation and a recovery gap before the next wave.
+  const staggeredDurationMs = Math.min(CONFIG.staggeredWaveDurationMs,
+    Math.max(tailMs, timing.intervalMs - timing.recoveryMs));
   const parentSpanMs = isStaggeredWave
-    ? Math.max(0, CONFIG.staggeredWaveDurationMs - tailMs)
+    ? Math.max(0, staggeredDurationMs - tailMs)
     : Math.min(CONFIG.parentBirthSpanMs, (state.pendingParents.length - 1) * CONFIG.parentBirthStaggerMs);
-  const waveDurationMs = isStaggeredWave ? CONFIG.staggeredWaveDurationMs : parentSpanMs + tailMs;
+  const waveDurationMs = parentSpanMs + tailMs;
   state.pendingParentSpacingMs = parentSpanMs / Math.max(1, state.pendingParents.length - 1);
   state.pendingWaveStartedAt = state.elapsedMs;
   state.breedingBusyUntil = state.elapsedMs + waveDurationMs;
   state.nextBreedAt = state.elapsedMs + Math.max(
-    CONFIG.breedIntervalMs,
-    waveDurationMs + CONFIG.breedingRecoveryMs,
+    timing.intervalMs,
+    waveDurationMs + timing.recoveryMs,
   );
   // Each litter will emerge from a living source, then displace nearby circles.
   state.pendingBirthAt = state.elapsedMs;

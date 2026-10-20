@@ -47,6 +47,37 @@ button:focus-visible {
   display: none !important;
 }
 
+.language-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: max-content;
+  border: 1px solid var(--line);
+  pointer-events: auto;
+}
+.language-switch button {
+  min-width: 34px;
+  min-height: 28px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper);
+  color: #62645c;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.language-switch button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.language-switch button:hover:not([aria-pressed="true"]) { background: #e2dfd5; }
+.cover-tools, .hud-stage-line, .reveal-controls, .ending-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ending-header { justify-content: space-between; }
+.hud-stage-line { height: 18px; }
+.reveal-controls { pointer-events: auto; }
+.eyebrow .reveal-badge, .eyebrow .ending-brand { color: inherit; }
+
 .intro-screen {
   position: fixed;
   z-index: 5;
@@ -299,7 +330,7 @@ button:focus-visible {
   width: 100%;
   height: 100%;
   touch-action: manipulation;
-  cursor: url("./sold-out-cursor.svg") 48 24, pointer;
+  cursor: url("./sold-out-cursor.svg") 36 18, pointer;
 }
 
 #animal-canvas.is-physics {
@@ -625,6 +656,7 @@ button:focus-visible {
   gap: 16px;
   padding: 16px clamp(18px, 3vw, 42px);
   pointer-events: none;
+  flex-wrap: wrap;
 }
 .sr-only {
   position: absolute;
@@ -656,6 +688,11 @@ button:focus-visible {
 .result-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0; padding: 0; list-style: none; }
 .result-grid li { display: grid; gap: 9px; padding: 15px 0; border-top: 1px solid var(--line); }
 .result-grid span { font-size: 13px; }
+.result-label { display: flex; align-items: center; gap: 9px; min-height: 36px; }
+.result-label > span { min-width: 0; overflow-wrap: break-word; }
+.result-icon { display: block; flex: 0 0 36px; width: 36px; height: 36px; }
+.ending-context { max-width: 720px; margin: 26px 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.ending-context p { margin: 0 0 12px; color: #62645c; font-size: 13px; line-height: 1.9; }
 .result-grid strong { font: 400 clamp(30px, 4vw, 44px) "Consolas", monospace; }
 .result-grid small { color: var(--muted); font: 12px "Consolas", monospace; }
 .ending-restart { margin-top: 24px; padding: 12px 20px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 13px; }
@@ -664,4 +701,17 @@ button:focus-visible {
   .reveal-hud { padding: 12px 14px; }
   .reveal-hud .eyebrow { font-size: 9px; }
   .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* English phrases wrap naturally instead of inheriting wide CJK tracking. */
+html[lang="en"] .cover-description,
+html[lang="en"] .cover-start-hint,
+html[lang="en"] .cover-footer,
+html[lang="en"] .hud-title h2,
+html[lang="en"] .ending-copy h1 { letter-spacing: 0; }
+html[lang="en"] #capacity-screen h2 { font-size: clamp(24px, 4.2vw, 52px); letter-spacing: 0; }
+html[lang="en"] .ending-copy p { max-width: 760px; }
+@media (max-width: 620px) {
+  html[lang="en"] .cover-footer { align-items: flex-start; gap: 16px; }
+  html[lang="en"] .cover-footer > span { max-width: 50%; }
 }

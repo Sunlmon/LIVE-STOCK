@@ -1,12 +1,14 @@
 import { CONFIG, PHYSICS_CONFIG } from "./config.js";
 import { SPECIES, loadAnimalSprites, findAnimalAt, updateAnimalAnimations } from "./animals.js";
-import { beginBreedingPulse, advanceBreedingPulse, measureDensity, isScreenSaturated } from "./breeding.js";
+import { beginBreedingPulse, advanceBreedingPulse, getBreedingTiming, measureDensity } from "./breeding.js";
 import { createCanvasRenderer } from "./canvas-renderer.js";
 import { adoptAnimal, updateParticles } from "./particles.js";
-import { createState, startRound, captureStageOne, beginCapacityNotice, advanceCapacityNotice } from "./state.js";
-import { isPackingSettled } from "./packing.js";
+import { createState, startRound, captureStageOne, beginStageOneFinish, isStageOneFinishReady, beginCapacityNotice, advanceCapacityNotice } from "./state.js";
 import { createPhysicsStage } from "./physics-stage.js";
-import { createReveal, updateReveal, revealVisualAt, FATE_LABELS, REVEAL_CONFIG } from "./reveal.js";
+import { createReveal, updateReveal, revealVisualAt, REVEAL_CONFIG } from "./reveal.js";
+import { drawExitIcon } from "./physics-renderer.js";
+import { translate, getFateLabels, localizePhysicsError, normalizeLanguage,
+  readLanguagePreference, saveLanguagePreference, applyTranslations } from "./i18n.js";
 
 const introScreen = document.querySelector("#intro-screen");
 const playScreen = document.querySelector("#play-screen");
@@ -45,6 +47,40 @@ let previousFrameAt = 0;
 let introIsLeaving = false;
 let introExitStartedAt = null;
 let activePointer = null;
+let language = readLanguagePreference();
+const t = (key, values) => translate(language, key, values);
+
+for (const group of document.querySelectorAll("[data-language-switch]")) {
+  for (const [locale, label] of [["zh", "中文"], ["en", "EN"]]) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.language = locale;
+    button.lang = locale === "zh" ? "zh-CN" : "en";
+    button.textContent = label;
+    button.setAttribute("aria-label", locale === "zh" ? "切换到中文 / Switch to Chinese" : "Switch to English / 切换到英文");
+    button.addEventListener("click", () => {
+      if (language === locale) return;
+      language = normalizeLanguage(locale);
+      saveLanguagePreference(language);
+      // Text wrapping can change the HUD/viewport fit. Cancel a held lever
+      // safely, like resizing, without launching or replacing its animal.
+      cancelPointer();
+      refreshLanguage();
+    });
+    group.append(button);
+  }
+}
+refreshLanguage();
+
+function refreshLanguage() {
+  applyTranslations(document, language);
+  const canvasKey = state.mode === "physics" ? "canvas.physics" : state.mode === "reveal" ? "canvas.reveal" : "canvas.active";
+  canvas.setAttribute("aria-label", t(canvasKey));
+  if (state.mode === "physics") updatePhysicsHud();
+  if (state.mode === "reveal") updateRevealStatus();
+  if (state.mode === "ending") updateEndingText();
+  renderer?.resize();
+}
 
 try {
   sprites = await loadAnimalSprites();
@@ -139,7 +175,7 @@ function beginRound() {
   playScreen.inert = false;
   canvas.classList.remove("is-physics");
   canvas.classList.remove("is-reveal");
-  canvas.setAttribute("aria-label", "点击动物，尝试将它们领养离开");
+  canvas.setAttribute("aria-label", t("canvas.active"));
   playScreen.hidden = false;
   if (fromCover) {
     introIsLeaving = true;
@@ -159,6 +195,14 @@ function hideCapacityNotice() {
   capacityScreen.classList.remove("is-visible");
   canvas.classList.remove("is-capacity");
   canvas.inert = false;
+}
+
+function lockStageOneEndIfNeeded() {
+  if (!beginStageOneFinish(state)) return;
+  // Canvas animation continues; native pointer input and the active-only
+  // adoption handler are both disabled from the threshold-crossing frame.
+  canvas.inert = true;
+  updateHud(true);
 }
 
 function showCapacityNotice() {
@@ -192,16 +236,16 @@ function enterPhysics(retry = false) {
   stageOneHud.hidden = true;
   physicsHud.hidden = false;
   canvas.classList.add("is-physics");
-  canvas.setAttribute("aria-label", "四只动物的物理弹珠体验：向下拖动右下角拉杆，松开发射；返回通道的动物可再次发射");
+  canvas.setAttribute("aria-label", t("canvas.physics"));
   try {
     state.physics = createPhysicsStage(window.Matter, state.physicsRepresentatives, state.physicalOutcomes);
     updatePhysicsHud();
   } catch (error) {
     console.error("无法初始化物理装置：", error);
-    physicsStatus.textContent = "装置未能载入，请检查 vendor 文件并刷新页面。";
+    physicsStatus.textContent = t("physics.loadError");
     physicsStatus.classList.add("is-error");
     physicsRetry.hidden = false;
-    physicsProgress.textContent = "已发射 0 / 4";
+    physicsProgress.textContent = t("physics.progress", { count: 0 });
   }
   renderer?.resize();
   previousFrameAt = 0;
@@ -209,18 +253,24 @@ function enterPhysics(retry = false) {
 
 function updatePhysicsHud() {
   const physics = state.physics?.state;
-  if (!physics) return;
+  if (!physics) {
+    if (state.mode === "physics") {
+      physicsStatus.textContent = t("physics.loadError");
+      physicsProgress.textContent = t("physics.progress", { count: 0 });
+    }
+    return;
+  }
   let hint;
-  if (physics.status === "complete") hint = "本轮体验完成。";
-  else if (physics.status === "error") hint = physics.error;
-  else if (physics.status === "flight") hint = "运动中 · 等待动物通过出口。";
-  else if (physics.status === "returned") hint = "动物已返回发射通道 · 可再次拉动拉杆发射。";
+  if (physics.status === "complete") hint = t("physics.complete");
+  else if (physics.status === "error") hint = localizePhysicsError(language, physics.error);
+  else if (physics.status === "flight") hint = t("physics.flight");
+  else if (physics.status === "returned") hint = t("physics.returned");
   else if (physics.status === "pulling") hint = physics.pull >= PHYSICS_CONFIG.minPull
-    ? `蓄力 ${Math.round(physics.pull / PHYSICS_CONFIG.maxPull * 100)}% · 松开发射。`
-    : "继续向下拉，越过中段的金色刻度。";
-  else hint = "向下拖过金色刻度，选择不同深度后松开发射。";
+    ? t("physics.charge", { percent: Math.round(physics.pull / PHYSICS_CONFIG.maxPull * 100) })
+    : t("physics.pullMore");
+  else hint = t("physics.ready");
   if (physicsStatus.textContent !== hint) physicsStatus.textContent = hint;
-  const progress = `已发射 ${physics.launched} / 4`;
+  const progress = t("physics.progress", { count: physics.launched });
   if (physicsProgress.textContent !== progress) physicsProgress.textContent = progress;
   physicsStatus.classList.toggle("is-error", physics.status === "error");
   physicsStatus.classList.toggle("is-charged", physics.status === "pulling" && physics.pull >= PHYSICS_CONFIG.minPull);
@@ -242,16 +292,15 @@ function enterReveal() {
   revealHud.hidden = false;
   canvas.classList.remove("is-physics");
   canvas.classList.add("is-reveal");
-  canvas.setAttribute("aria-label", "本轮模拟：动物静止、褪色，转为结局符号，再转为骷髅并逐个消散");
+  canvas.setAttribute("aria-label", t("canvas.reveal"));
   renderer.resize();
   updateRevealStatus();
 }
 
 function updateRevealStatus() {
   const phase = revealVisualAt(state.reveal.elapsedMs).phase;
-  const labels = { hold: "动物已停止运动。", fade: "动物正在褪色。", symbols: "动物转为本轮模拟的结局符号。",
-    skulls: "符号转为视觉隐喻中的骷髅。", dissolve: "图形正在逐个消散。" };
-  if (revealStatus.textContent !== labels[phase]) revealStatus.textContent = labels[phase];
+  const label = t(`reveal.${phase}`);
+  if (revealStatus.textContent !== label) revealStatus.textContent = label;
 }
 
 function showEnding(animationError = false) {
@@ -262,20 +311,42 @@ function showEnding(animationError = false) {
   playScreen.inert = true;
   endingScreen.hidden = false;
   document.querySelector("#ending-error").hidden = !animationError;
-  resultList.replaceChildren(...FATE_LABELS.map((label, i) => {
+  resultList.replaceChildren(...getFateLabels(language).map((label, i) => {
     const card = document.createElement("li");
-    const title = document.createElement("span"); title.textContent = label;
+    const title = document.createElement("span"); title.className = "result-label";
+    // Reuse the actual outlet symbols, not a separate or approximate icon set.
+    const icon = document.createElement("canvas");
+    icon.width = icon.height = 72;
+    icon.className = "result-icon";
+    icon.setAttribute("aria-hidden", "true");
+    const paint = icon.getContext("2d");
+    paint.translate(36, 36);
+    paint.lineCap = "round"; paint.lineJoin = "round";
+    drawExitIcon(paint, i, 0, 0, "#282A27");
+    const name = document.createElement("span"); name.textContent = label;
+    name.dataset.i18n = `fate.${i}`;
+    title.append(icon, name);
     const count = document.createElement("strong"); count.textContent = String(state.reveal.counts[i]);
     count.dataset.count = String(state.reveal.counts[i]);
     const percent = document.createElement("small"); percent.textContent = `${(state.reveal.percentages[i] / 10).toFixed(1)}%`;
     card.append(title, count, percent);
     return card;
   }));
-  resultSummary.textContent = `未领养 ${state.simulatedFates.length} 只 · 已领养 ${state.stageOneSummary?.adoptedCount ?? 0} 只（不参与模拟）`;
-  const actualCounts = FATE_LABELS.map((_, i) => state.physicalOutcomes.filter(item => item.exitIndex === i).length);
-  physicalSummary.textContent = `弹珠实际出口记录（仅 ${state.physicalOutcomes.length} 只）：${FATE_LABELS.map((label, i) => `${label} ${actualCounts[i]}`).join(" · ")}。以上整屏结果另行模拟，并非全部经过弹珠装置。`;
+  updateEndingText();
   endingScreen.scrollTop = 0;
   endingScreen.focus({ preventScroll: true });
+}
+
+function updateEndingText() {
+  resultSummary.textContent = t("ending.summary", {
+    remaining: state.simulatedFates.length, adopted: state.stageOneSummary?.adoptedCount ?? 0,
+  });
+  const labels = getFateLabels(language);
+  const actualCounts = labels.map((_, i) => state.physicalOutcomes.filter(item => item.exitIndex === i).length);
+  physicalSummary.textContent = t("ending.physical", {
+    count: state.physicalOutcomes.length,
+    results: labels.map((label, i) => `${label} ${actualCounts[i]}`).join(" · "),
+  });
 }
 
 function updateHud(force = false) {
@@ -301,44 +372,31 @@ function frame(timestamp) {
       }
     }
 
-    if (state.mode === "active" && !introIsLeaving) {
+    if ((state.mode === "active" || state.mode === "finishing") && !introIsLeaving) {
       state.elapsedMs += dt * 1000;
       updateAnimalAnimations(state.animals, dt);
       updateParticles(state.particles, dt);
 
       state.density = measureDensity(state.animals);
-      // Keep icon size fixed: leave when the screen is full, even before wave six.
-      const screenIsFull = isScreenSaturated(state);
-      // Adoption or redistribution can open room again during the full-screen hold.
-      if (!screenIsFull) state.saturationPendingAt = null;
+      lockStageOneEndIfNeeded();
 
       if (
-        state.saturationPendingAt === null && !screenIsFull &&
+        state.mode === "active" &&
         state.pendingBirthAt === null && state.elapsedMs >= state.nextBreedAt &&
         state.elapsedMs >= state.breedingBusyUntil
       ) {
-        if (!beginBreedingPulse(state)) state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
+        if (!beginBreedingPulse(state)) state.nextBreedAt = state.elapsedMs + getBreedingTiming(state.breedRound + 1).intervalMs;
       }
       if (state.pendingBirthAt !== null && state.elapsedMs >= state.pendingBirthAt) {
         advanceBreedingPulse(state);
       }
 
-      if (state.saturationPendingAt === null && screenIsFull) {
-        state.saturationPendingAt = state.elapsedMs + CONFIG.saturationTransitionDelayMs;
-      }
-      // Let in-flight offspring finish before the stage change so their movement
-      // is not cut off by the overlay.
-      if (
-        state.saturationPendingAt !== null &&
-        state.elapsedMs >= state.saturationPendingAt &&
-        state.elapsedMs >= state.breedingBusyUntil &&
-        state.pendingBirthAt === null &&
-        !state.animals.some((animal) => animal.birth && !animal.birth.complete) &&
-        (
-          isPackingSettled(state.animals, false) ||
-          state.elapsedMs >= state.saturationPendingAt + CONFIG.saturationMaxSettleMs
-        )
-      ) {
+      // A litter can reach the existing capacity limit in this very frame.
+      lockStageOneEndIfNeeded();
+      // No guessed duration, recovery timer or packing timeout: finish the
+      // already queued sources and every delayed/in-flight offspring first.
+      if (isStageOneFinishReady(state)) {
+        updateHud(true);
         showCapacityNotice();
       }
 
@@ -381,11 +439,13 @@ function frame(timestamp) {
     // A single bad reproduction frame should not stop requestAnimationFrame
     // forever and leave every parent frozen as a black dot.
     console.error("动画帧出错，已恢复繁殖动画：", error);
-    state.pendingParents = [];
-    state.pendingParentIndex = 0;
-    state.pendingBirthAt = null;
-    state.breedingBusyUntil = state.elapsedMs;
-    state.nextBreedAt = state.elapsedMs + CONFIG.breedIntervalMs;
+    if (state.mode !== "finishing") {
+      state.pendingParents = [];
+      state.pendingParentIndex = 0;
+      state.pendingBirthAt = null;
+      state.breedingBusyUntil = state.elapsedMs;
+      state.nextBreedAt = state.elapsedMs + getBreedingTiming(state.breedRound + 1).intervalMs;
+    }
     try {
       renderer?.render(state);
     } catch (renderError) {

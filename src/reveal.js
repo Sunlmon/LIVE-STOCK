@@ -4,6 +4,7 @@ import { drawExitIcon } from "./physics-renderer.js";
 export const FATE_LABELS = Object.freeze(["流浪", "意外死亡", "商品化处理", "继续繁育"]);
 export const REVEAL_CONFIG = Object.freeze({
   entryDelayMs: 520, holdMs: 1000, fadeMs: 1400, symbolsMs: 1500,
+  symbolsHoldMs: 2500,
   skullsMs: 1100, disappearSpanMs: 2600, disappearFadeMs: 320, blankMs: 240,
   // Creative simulation weights only, NOT researched real-world frequencies.
   weights: Object.freeze([1, 1, 1, 1]),
@@ -61,6 +62,10 @@ export function revealVisualAt(elapsedMs) {
     return { phase: "symbols", animal: 0.3 * (1 - u), fate: u, skull: 0, dissolveMs: -1, complete: false };
   }
   t -= C.symbolsMs;
+  if (t < C.symbolsHoldMs) {
+    return { phase: "fates", animal: 0, fate: 1, skull: 0, dissolveMs: -1, complete: false };
+  }
+  t -= C.symbolsHoldMs;
   if (t < C.skullsMs) {
     const u = smooth(t / C.skullsMs);
     return { phase: "skulls", animal: 0, fate: 1 - u, skull: u, dissolveMs: -1, complete: false };
