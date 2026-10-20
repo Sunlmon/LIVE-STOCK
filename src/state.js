@@ -18,12 +18,28 @@ export function createState() {
     pendingParentIndex: 0,
     pendingBirthAt: null,
     saturationPendingAt: null,
+    capacityElapsedMs: 0,
     lastHudUpdateAt: 0,
     density: 0,
+    physics: null,
+    stageOneSnapshot: [],
+    stageOneSummary: null,
+    physicsRepresentatives: [],
+    physicalOutcomes: [],
+    simulatedFates: [],
+    reveal: null,
   };
 }
 
 export function startRound(state) {
+  state.physics?.dispose();
+  state.physics = null;
+  state.stageOneSnapshot = [];
+  state.stageOneSummary = null;
+  state.physicsRepresentatives = [];
+  state.physicalOutcomes = [];
+  state.simulatedFates = [];
+  state.reveal = null;
   state.mode = "active";
   state.animals = createInitialPopulation();
   state.particles = [];
@@ -39,8 +55,37 @@ export function startRound(state) {
   state.pendingParentIndex = 0;
   state.pendingBirthAt = null;
   state.saturationPendingAt = null;
+  state.capacityElapsedMs = 0;
   state.lastHudUpdateAt = 0;
   state.density = 0;
+}
+
+export function beginCapacityNotice(state) {
+  if (state.mode !== "active") return false;
+  state.mode = "capacity";
+  state.capacityElapsedMs = 0;
+  return true;
+}
+
+export function advanceCapacityNotice(state, dt, paused = false) {
+  if (state.mode !== "capacity" || paused) return false;
+  state.capacityElapsedMs = Math.min(CONFIG.capacityNoticeMs,
+    state.capacityElapsedMs + Math.max(0, Math.min(dt, 0.05)) * 1000);
+  return state.capacityElapsedMs >= CONFIG.capacityNoticeMs - 1e-6;
+}
+
+export function captureStageOne(state) {
+  // Copy only stable individual data, not animation references to other animals.
+  state.stageOneSnapshot = Object.freeze(state.animals.map(({ species, x, y, phase }) =>
+    Object.freeze({ species, x, y, phase }),
+  ));
+  state.stageOneSummary = Object.freeze({ adoptedCount: state.adoptedCount, elapsedMs: state.elapsedMs });
+  const candidates = [...state.stageOneSnapshot];
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+  state.physicsRepresentatives = candidates.slice(0, 4);
 }
 
 function createInitialPopulation() {

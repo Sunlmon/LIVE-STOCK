@@ -34,6 +34,7 @@ export const CONFIG = Object.freeze({
   saturationDensity: 0.94,
   saturationTransitionDelayMs: 3200,
   saturationMaxSettleMs: 3000,
+  capacityNoticeMs: 4400,
   safeTop: 128,
   safeBottom: 54,
   birthSpreadMin: 75 * 0.7,
@@ -60,4 +61,46 @@ export const COLORS = Object.freeze({
   line: "#BDBDB4",
   amber: "#D6A34F",
   red: "#B84940",
+});
+
+// Stage two has its own dimensions and timing; stage-one settings stay intact.
+export const PHYSICS_CONFIG = Object.freeze({
+  animalDiameter: 48,
+  totalShots: 4,
+  stepMs: 1000 / 120,
+  maxSubsteps: 6,
+  gravity: 1,
+  ballMass: 0.65,
+  ballRestitution: 0.7,
+  springStiffness: 0.004,
+  springDamping: 0.0025,
+  pistonMass: 2.5,
+  minPull: 120,
+  maxPull: 240,
+  maxSpringCompression: 82,
+  flightTimeoutMs: 30000,
+  launchX: 1298,
+  pistonWidth: 54,
+  pistonRestY: 925,
+  handleX: 1425,
+  handleY: 760,
+  handleWidth: 88,
+  handleHeight: 44,
+});
+
+// All stage-two geometry uses the same logical coordinates as the Canvas.
+export const PHYSICS_LAYOUT = Object.freeze({
+  frameLeft: 594, frameTop: 122, frameWidth: 774, frameHeight: 932,
+  fieldLeft: 636, fieldRight: 1249,
+  leftWallX: 623, rightWallX: 1340, partitionX: 1259,
+  partitionTop: 380, ceilingY: 145, floorY: 1030,
+  laneCount: 8, dividerTop: 870, exitY: 978,
+  launchChannelWidth: 58,
+  pistonStopY: 895, pistonStopHeight: 18, pistonStopWidth: 38,
+});
+
+// Stage-two presentation only: leave the first-stage palette and forces alone.
+export const PHYSICS_PALETTE = Object.freeze({
+  paper: "#F1EFE8", body: "#C5C3BC", silver: "#A9AAA5",
+  graphite: "#343530", launcher: "#D8D3C7", amber: "#B68A4A",
 });

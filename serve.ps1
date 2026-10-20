@@ -9,10 +9,13 @@ try {
   while ($true) {
     $client = $listener.AcceptTcpClient()
     try {
+      # Browsers may open an idle preconnection or cancel a request during reload.
+      $client.ReceiveTimeout = 3000
       $stream = $client.GetStream()
       $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::ASCII, $false, 1024, $true)
       $requestLine = $reader.ReadLine()
-      while (($headerLine = $reader.ReadLine()) -ne "") { }
+      if ($null -eq $requestLine) { continue }
+      while ($null -ne ($headerLine = $reader.ReadLine()) -and $headerLine -ne "") { }
 
       $requestPath = "/"
       if ($requestLine) {
@@ -44,6 +47,8 @@ try {
       $stream.Write($headerBytes, 0, $headerBytes.Length)
       $stream.Write($body, 0, $body.Length)
       $stream.Flush()
+    } catch [System.IO.IOException] {
+      # Close aborted / timed-out connections and keep serving later requests.
     } finally {
       $client.Close()
     }

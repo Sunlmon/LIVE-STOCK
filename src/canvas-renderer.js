@@ -1,11 +1,22 @@
 import { CONFIG, COLORS } from "./config.js";
 import { getAnimalCenter, getAnimalScale } from "./animals.js";
+import { drawPhysicsStage, drawPhysicsDecorations } from "./physics-renderer.js";
+import { fitPhysicsViewport, screenPointToPhysics } from "./physics-viewport.js";
+import { drawReveal } from "./reveal.js";
 
-export function createCanvasRenderer(canvas, sprites) {
+export function createCanvasRenderer(canvas, sprites, { physicsHud } = {}) {
   const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
   if (!context) throw new Error("当前浏览器无法创建 Canvas 2D 画布");
 
   const viewport = { width: 1, height: 1, dpr: 1, scale: 1, offsetX: 0, offsetY: 0 };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let physicsViewport;
+
+  function fitPhysics() {
+    const bounds = canvas.getBoundingClientRect();
+    const hudBottom = physicsHud && !physicsHud.hidden ? physicsHud.getBoundingClientRect().bottom - bounds.top : 80;
+    physicsViewport = fitPhysicsViewport(viewport.width, viewport.height, hudBottom);
+  }
 
   function resize() {
     const bounds = canvas.getBoundingClientRect();
@@ -20,6 +31,7 @@ export function createCanvasRenderer(canvas, sprites) {
     viewport.offsetY = (viewport.height - CONFIG.logicalHeight * viewport.scale) / 2;
     canvas.width = Math.round(viewport.width * viewport.dpr);
     canvas.height = Math.round(viewport.height * viewport.dpr);
+    fitPhysics();
   }
 
   function render(state) {
@@ -27,12 +39,24 @@ export function createCanvasRenderer(canvas, sprites) {
     context.fillStyle = COLORS.paper;
     context.fillRect(0, 0, viewport.width, viewport.height);
     context.save();
+    if (state.mode === "physics") {
+      if (state.physics) {
+        drawPhysicsDecorations(context, sprites, reducedMotion.matches ? 0 : state.physics.state.elapsedMs, physicsViewport.decorations);
+        context.translate(physicsViewport.offsetX, physicsViewport.offsetY);
+        context.scale(physicsViewport.scale, physicsViewport.scale);
+        drawPhysicsStage(context, state.physics.state, sprites);
+      }
+      context.restore();
+      return;
+    }
     context.translate(viewport.offsetX, viewport.offsetY);
     context.scale(viewport.scale, viewport.scale);
 
-    if (state.mode === "active") {
+    if (state.mode === "active" || state.mode === "capacity") {
       drawAnimals(state.animals, state.elapsedMs);
       drawParticles(state.particles);
+    } else if (state.mode === "reveal" && state.reveal) {
+      drawReveal(context, state.reveal, sprites);
     }
 
     context.restore();
@@ -97,6 +121,7 @@ export function createCanvasRenderer(canvas, sprites) {
     const bounds = canvas.getBoundingClientRect();
     const x = clientX - bounds.left;
     const y = clientY - bounds.top;
+    if (canvas.classList.contains("is-physics")) return screenPointToPhysics(physicsViewport, x, y);
     return {
       x: (x - viewport.offsetX) / viewport.scale,
       y: (y - viewport.offsetY) / viewport.scale,
@@ -104,5 +129,7 @@ export function createCanvasRenderer(canvas, sprites) {
   }
 
   resize();
+  // Hint/control wrapping may change header height without a window resize.
+  if (physicsHud && typeof ResizeObserver !== "undefined") new ResizeObserver(fitPhysics).observe(physicsHud);
   return { render, resize, pointerToLogical };
 }

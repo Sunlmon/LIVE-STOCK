@@ -302,6 +302,79 @@ button:focus-visible {
   cursor: url("./sold-out-cursor.svg") 48 24, pointer;
 }
 
+#animal-canvas.is-physics {
+  cursor: default;
+  touch-action: none;
+}
+
+#animal-canvas.is-physics.is-pulling {
+  cursor: grabbing !important;
+}
+
+.physics-hud {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 80px;
+  padding: 16px clamp(18px, 3vw, 42px) 8px;
+  pointer-events: none;
+}
+
+.physics-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 36px;
+  max-width: 460px;
+}
+
+.physics-hint.is-error {
+  color: var(--red);
+}
+
+.physics-hint.is-charged {
+  color: #b68a4a;
+}
+
+.physics-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.physics-progress {
+  font-family: "Consolas", "Microsoft YaHei", monospace;
+  font-size: 13px;
+}
+
+.physics-button {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 11px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.physics-button:hover {
+  border-color: var(--ink);
+}
+
+@media (max-width: 620px) {
+  .physics-hud { gap: 10px; padding: 12px 14px 6px; }
+  .physics-hint { min-height: 45px; max-width: none; font-size: 10px; line-height: 15px; }
+  .physics-controls { max-width: 116px; gap: 8px; }
+  .physics-progress { font-size: 11px; }
+}
+
 .hud {
   position: absolute;
   z-index: 2;
@@ -424,6 +497,18 @@ button:focus-visible {
   font-size: 13px;
 }
 
+#animal-canvas.is-capacity { cursor: default; }
+#capacity-screen { overflow-y: auto; align-content: safe center; padding: clamp(18px, 4vh, 32px); gap: 14px; }
+#capacity-screen.is-visible { animation-duration: 320ms; }
+#capacity-screen h2 { font-size: clamp(28px, 4.2vw, 58px); }
+.capacity-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; }
+.capacity-continue { padding: 11px 18px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); font-size: 13px; cursor: pointer; }
+.capacity-continue:hover { background: #41433e; }
+#capacity-screen .capacity-timing { margin-top: 6px; font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+  #capacity-screen.is-visible { animation: none; opacity: 1; }
+}
+
 .load-error {
   position: absolute;
   z-index: 4;
@@ -526,4 +611,57 @@ button:focus-visible {
   .intro-screen.is-leaving {
     animation-duration: 0.01ms;
   }
+}
+
+/* Stage three is isolated from the existing game and apparatus layout. */
+#animal-canvas.is-reveal { cursor: default; }
+.reveal-hud {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px clamp(18px, 3vw, 42px);
+  pointer-events: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.ending-screen {
+  position: fixed;
+  z-index: 6;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--paper);
+  padding: clamp(28px, 5vh, 64px) clamp(20px, 5vw, 80px);
+}
+.ending-content { width: min(100%, 960px); margin: 0 auto; }
+.ending-screen:focus { outline: none; }
+.ending-copy { margin: clamp(28px, 5vh, 56px) 0; }
+.ending-copy h1 { margin: 0 0 22px; font-size: clamp(28px, 4vw, 48px); font-weight: 500; letter-spacing: 0.04em; }
+.ending-copy p { margin: 9px 0; font-size: clamp(15px, 1.7vw, 21px); line-height: 1.7; }
+.ending-copy p:last-child { margin-top: 20px; }
+.ending-results { border-top: 1px solid var(--line); padding-top: 24px; }
+.ending-results h2 { margin: 0 0 8px; font-size: 16px; font-weight: 500; letter-spacing: 0.08em; }
+.ending-note { margin: 8px 0; color: #74766d; font-size: 11px; line-height: 1.8; }
+.result-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0; padding: 0; list-style: none; }
+.result-grid li { display: grid; gap: 9px; padding: 15px 0; border-top: 1px solid var(--line); }
+.result-grid span { font-size: 13px; }
+.result-grid strong { font: 400 clamp(30px, 4vw, 44px) "Consolas", monospace; }
+.result-grid small { color: var(--muted); font: 12px "Consolas", monospace; }
+.ending-restart { margin-top: 24px; padding: 12px 20px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 13px; }
+.ending-restart:hover { background: var(--ink); color: var(--paper); }
+@media (max-width: 620px) {
+  .reveal-hud { padding: 12px 14px; }
+  .reveal-hud .eyebrow { font-size: 9px; }
+  .result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
