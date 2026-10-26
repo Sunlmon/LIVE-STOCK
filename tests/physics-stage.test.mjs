@@ -10,7 +10,9 @@ import { getOutletFlash, OUTLET_FLASH_MS } from "../src/physics-feedback.js";
 const require = createRequire(import.meta.url);
 const Matter = require("../vendor/matter-0.20.0.min.js");
 const representatives = ["cat", "dog", "bird", "goldfish"].map(species => ({ species }));
-const make = () => createPhysicsStage(Matter, representatives);
+// Centre-loaded fixtures preserve exact regression paths. Separate tests below
+// exercise the production loading tolerance instead of relying on chance.
+const make = () => createPhysicsStage(Matter, representatives, [], { random: () => 0.5 });
 function launch(stage, pull) {
   assert.equal(stage.beginPull(stage.handlePosition()), true);
   stage.dragPull({ x: P.handleX, y: P.handleY + pull });
@@ -391,4 +393,45 @@ test("snapshot excludes adopted animals and survives physics retry; full restart
 
 test("missing library produces an understandable initialization error", () => {
   assert.throws(() => createPhysicsStage(null, representatives), /Matter.js/);
+});
+
+test("loading tolerance stays inside the well and is sampled once per unique animal, not per release", () => {
+  let calls = 0;
+  const stage = createPhysicsStage(Matter, representatives, [], { random: () => { calls++; return 0; } });
+  const body = stage.state.active.body;
+  assert.equal(calls, 1);
+  assert.equal(body.position.x, P.launchX - P.launchSeatJitter);
+  assert.ok(body.position.x - P.animalDiameter / 2 > L.partitionX + 10);
+  assert.ok(body.position.x + P.animalDiameter / 2 < L.rightWallX - 13);
+  stage.beginPull(stage.handlePosition()); stage.cancelPull();
+  assert.equal(calls, 1, "cancel does not reroll the animal");
+  const initial = { position: { ...body.position }, velocity: { ...body.velocity } };
+  launch(stage, 180);
+  assert.deepEqual({ position: { ...body.position }, velocity: { ...body.velocity } }, initial,
+    "release must not inject a random position or velocity");
+  finishFlight(stage);
+  assert.equal(stage.state.outcomes[0].seatOffsetX, -P.launchSeatJitter);
+  assert.equal(calls, 2, "only loading the next animal samples another tolerance");
+  stage.dispose();
+});
+
+test("identical forces with bounded loading offsets can reach different real exits without forcing a quota", (context) => {
+  for (const pull of [180, 220, 240]) {
+    const counts = [0, 0, 0, 0];
+    for (let i = 0; i < 29; i++) {
+      const stage = createPhysicsStage(Matter, representatives, [], { random: () => i / 28 });
+      launch(stage, pull);
+      finishFlight(stage);
+      const outcome = stage.state.outcomes[0];
+      assert.equal(outcome.launches[0].pullDistance, pull);
+      assert.ok(Math.abs(outcome.seatOffsetX) <= P.launchSeatJitter);
+      assert.equal(outcome.exitIndex, Math.floor(outcome.laneIndex / 2));
+      counts[outcome.exitIndex]++;
+      stage.dispose();
+    }
+    assert.ok(counts.filter(n => n > 0).length >= 3, `fixed force ${pull}: ${counts}`);
+    assert.equal(counts.reduce((a, b) => a + b), 29);
+    assert.ok(new Set(counts).size > 1, "there is no equal-outlet quota");
+    context.diagnostic(`pull=${pull}, actual exit counts (29 offset samples): ${counts.join(", ")}`);
+  }
 });

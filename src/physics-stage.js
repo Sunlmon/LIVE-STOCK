@@ -2,7 +2,7 @@ import { PHYSICS_CONFIG as P, PHYSICS_LAYOUT as L } from "./config.js";
 
 // This module never assigns a route or exit to a moving animal. Only Matter
 // integrates its motion, including the initial collision with the spring piston.
-export function createPhysicsStage(Matter, representatives, outcomes = []) {
+export function createPhysicsStage(Matter, representatives, outcomes = [], { random = Math.random } = {}) {
   if (!Matter?.Engine || !Matter?.Bodies) throw new Error("Matter.js 未能载入，请检查本地 vendor 文件。");
   if (representatives.length !== P.totalShots) throw new Error("本阶段需要四只待发射动物。");
   const { Engine, Bodies, Body, Composite, Events } = Matter;
@@ -109,7 +109,13 @@ export function createPhysicsStage(Matter, representatives, outcomes = []) {
     Body.setStatic(piston, true);
     Body.setPosition(piston, { x: P.launchX, y: P.pistonRestY });
     Body.setVelocity(piston, { x: 0, y: 0 });
-    const body = Bodies.circle(P.launchX, P.pistonRestY - 7 - P.animalDiameter / 2 - 1, P.animalDiameter / 2, {
+    // A real loading tolerance breaks the identical-start/identical-force loop.
+    // This is sampled BEFORE the shot, within the actual well's clearance; it
+    // never reads an exit/count, changes force, or nudges a moving animal.
+    const seatRange = Math.max(0, Math.min(P.launchSeatJitter,
+      (L.launchChannelWidth - P.animalDiameter) / 2 - 1.5));
+    const seatOffsetX = (Math.max(0, Math.min(1, random())) * 2 - 1) * seatRange;
+    const body = Bodies.circle(P.launchX + seatOffsetX, P.pistonRestY - 7 - P.animalDiameter / 2 - 1, P.animalDiameter / 2, {
       restitution: P.ballRestitution, friction: 0.015, frictionAir: 0.001,
       label: "animal", slop: 0.02,
     });
@@ -118,7 +124,7 @@ export function createPhysicsStage(Matter, representatives, outcomes = []) {
     const source = representatives[state.launched];
     state.active = { body, species: source.species, shot: state.launched + 1,
       recorded: false, enteredField: false, hasLeftSeat: false, launchCount: 0,
-      launches: [], compression: 0, pullDistance: 0 };
+      launches: [], compression: 0, pullDistance: 0, seatOffsetX };
     Composite.add(engine.world, body);
     state.status = "ready";
     state.pull = 0;
@@ -158,7 +164,7 @@ export function createPhysicsStage(Matter, representatives, outcomes = []) {
     pendingExit = null;
     // World mutations happen outside the collision event / Engine.update call.
     outcomes.push({ shot: animal.shot, species: animal.species, exitIndex, laneIndex: lane.index,
-      compression: animal.compression, pullDistance: animal.pullDistance,
+      compression: animal.compression, pullDistance: animal.pullDistance, seatOffsetX: animal.seatOffsetX,
       launchCount: animal.launchCount, launches: animal.launches.map(attempt => ({ ...attempt })),
       passedAtMs: state.elapsedMs });
     state.exitCounts[exitIndex] += 1;

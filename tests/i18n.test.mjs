@@ -22,6 +22,18 @@ test("every static HTML translation and accessibility label exists in both langu
   assert.ok(keys.length > 35);
   for (const key of keys) for (const locale of ["zh", "en"]) assert.ok(Object.hasOwn(MESSAGES[locale], key), key);
   assert.equal([...html.matchAll(/data-language-switch/g)].length, 6);
+  assert.equal(html.includes('class="capacity-timing"'), false);
+  assert.equal(html.includes('data-i18n="capacity.timing"'), false);
+  const capacityActions = html.match(/<div class="capacity-actions">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(capacityActions);
+  assert.equal([...capacityActions.matchAll(/<button\b/g)].length, 1);
+  assert.ok(capacityActions.includes('id="capacity-continue"'));
+  assert.equal(html.includes('id="capacity-restart"'), false);
+  const main = await readFile(new URL("../src/main.js", import.meta.url), "utf8");
+  assert.equal(main.includes('querySelector("#capacity-restart")'), false);
+  const startMarkup = html.match(/<button[^>]*id="start-button"[^>]*>([\s\S]*?)<\/button>/)?.[1];
+  assert.ok(startMarkup);
+  assert.equal(/svg|start-index|start-contact|[↗→]/.test(startMarkup), false);
 });
 
 test("dynamic numbers are interpolated without changing their values", () => {
@@ -30,6 +42,16 @@ test("dynamic numbers are interpolated without changing their values", () => {
   assert.equal(translate("en", "physics.progress", { count: 3 }), "Launched 3 / 4");
   assert.match(translate("en", "ending.summary", { remaining: 479, adopted: 80 }), /479.*80/);
   assert.match(translate("en", "ending.physical", { count: 4, results: "Stray life 0" }), /4 animals only.*Stray life 0/);
+  assert.equal(translate("zh", "physics.tryVariation", { percent: 75 }), "上次蓄力 75% · 试试更浅或更深地拉动。");
+  assert.match(translate("en", "physics.tryVariation", { percent: 75 }), /75%/);
+  for (let i = 0; i < 4; i++) for (const locale of ["zh", "en"]) {
+    assert.ok(translate(locale, `fate.description.${i}`).length > 15);
+  }
+  assert.match(translate("zh", "fate.description.3"), /并不代表死亡/);
+  assert.match(translate("en", "fate.description.3"), /does not mean death/);
+  assert.equal(translate("zh", "capacity.continue"), "确认");
+  assert.equal(translate("en", "capacity.continue"), "Confirm");
+  assert.equal(/[↗→]/.test(translate("zh", "button.endingRestart")), false);
 });
 
 test("localized fate names retain the original four physical exit indices", () => {

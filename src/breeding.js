@@ -1,10 +1,14 @@
 import { CONFIG } from "./config.js";
 import { createAnimal, getAnimalCenter } from "./animals.js";
 
-export function getBreedingTiming(waveNumber) {
+export function getBreedingTiming(waveNumber, random = Math.random) {
   const factor = CONFIG.breedIntervalDecay ** Math.max(0, waveNumber - 1);
+  const baseIntervalMs = Math.max(CONFIG.breedIntervalMinMs, CONFIG.breedIntervalMs * factor);
+  // Sample once per scheduled wave, not once per animation frame. At the floor
+  // keep a little upward variation rather than becoming perfectly periodic.
+  const jitter = 1 + (random() * 2 - 1) * CONFIG.breedIntervalJitter;
   return {
-    intervalMs: Math.max(CONFIG.breedIntervalMinMs, CONFIG.breedIntervalMs * factor),
+    intervalMs: Math.max(CONFIG.breedIntervalMinMs, baseIntervalMs * jitter),
     recoveryMs: Math.max(CONFIG.breedingRecoveryMinMs, CONFIG.breedingRecoveryMs * factor),
   };
 }
@@ -15,7 +19,7 @@ export function beginBreedingPulse(state) {
   // Use a snapshot so this wave's own newborns cannot recursively join its queue.
   const parents = [...state.animals];
   const waveNumber = state.breedRound + 1;
-  const capacity = getPopulationLimit() - state.animals.length;
+  const capacity = getPopulationLimit(state) - state.animals.length;
   if (parents.length === 0 || capacity <= 0) return false;
 
   const ramp = Math.min(1, Math.max(0, state.elapsedMs / CONFIG.breedingRampMs));
@@ -29,14 +33,10 @@ export function beginBreedingPulse(state) {
   const isStaggeredWave = waveNumber >= CONFIG.staggeredWaveFirst &&
     waveNumber <= CONFIG.staggeredWaveLast;
   if (isStaggeredWave) {
-    // Reserve a complete minimum litter for every selected parent. Prefer fewer
-    // sources to truncating the last litters when the screen is nearly full.
-    parentCount = Math.min(
-      Math.max(CONFIG.staggeredWaveMinParents, Math.min(parentCount, Math.floor(capacity / CONFIG.litterMax))),
-      Math.floor(capacity / CONFIG.litterMin),
-    );
-  } else {
-    parentCount = Math.min(parentCount, Math.floor(capacity / CONFIG.litterMin));
+    // Do not reduce the scheduled sources just because only a few places are
+    // free right now: adoptions can free more places during this same wave.
+    // The live per-litter capacity check stops at this round's sampled limit.
+    parentCount = Math.max(CONFIG.staggeredWaveMinParents, parentCount);
   }
   if (parentCount < 1) return false;
   state.pendingParents = selectSparseParents(parents, Math.min(parentCount, parents.length));
@@ -51,7 +51,8 @@ export function beginBreedingPulse(state) {
     Math.max(tailMs, timing.intervalMs - timing.recoveryMs));
   const parentSpanMs = isStaggeredWave
     ? Math.max(0, staggeredDurationMs - tailMs)
-    : Math.min(CONFIG.parentBirthSpanMs, (state.pendingParents.length - 1) * CONFIG.parentBirthStaggerMs);
+    : Math.min(CONFIG.parentBirthSpanMs, (state.pendingParents.length - 1) * CONFIG.parentBirthStaggerMs,
+      Math.max(0, timing.intervalMs - timing.recoveryMs - tailMs));
   const waveDurationMs = parentSpanMs + tailMs;
   state.pendingParentSpacingMs = parentSpanMs / Math.max(1, state.pendingParents.length - 1);
   state.pendingWaveStartedAt = state.elapsedMs;
@@ -70,7 +71,7 @@ export function advanceBreedingPulse(state) {
   if (parents.length === 0) return finishBreedingPulse(state);
   if (state.elapsedMs < state.pendingBirthAt) return false;
 
-  const targetCount = getPopulationLimit();
+  const targetCount = getPopulationLimit(state);
   const end = Math.min(
     state.pendingParentIndex + CONFIG.breedingParentsPerFrame,
     parents.length,
@@ -86,10 +87,11 @@ export function advanceBreedingPulse(state) {
 
     // Newborns are absent from this snapshot, so they cannot breed in this pulse.
     const origin = getAnimalCenter(parent, state.elapsedMs);
-    const remainingParents = parents.slice(state.pendingParentIndex)
-      .filter((candidate) => state.animals.includes(candidate)).length;
-    const availableForLitter = targetCount - state.animals.length - remainingParents * CONFIG.litterMin;
-    const litterSize = randomInt(CONFIG.litterMin, Math.min(CONFIG.litterMax, availableForLitter));
+    const availableForLitter = targetCount - state.animals.length;
+    // The final 1–3 remaining places may form a smaller last litter. Otherwise
+    // the scene could otherwise strand itself just below this round's limit.
+    const litterSize = randomInt(Math.min(CONFIG.litterMin, availableForLitter),
+      Math.min(CONFIG.litterMax, availableForLitter));
     const rotation = Math.random() * Math.PI * 2;
     const destinations = [];
     state.waveParentsStarted += 1;
@@ -164,15 +166,23 @@ export function measureDensity(animals) {
 }
 
 export function isScreenSaturated(state) {
-  return state.density >= CONFIG.saturationDensity;
+  // Density remains a visual meter, not an early exit at 450–500 animals.
+  return state.animals.length >= getPopulationLimit(state);
 }
 
-export function getPopulationLimit() {
+export function samplePopulationLimit(random = Math.random) {
+  const target = Math.min(CONFIG.stageOneEndMax, CONFIG.stageOneEndMin +
+    Math.floor(Math.max(0, Math.min(1, random())) * (CONFIG.stageOneEndMax - CONFIG.stageOneEndMin + 1)));
+  return getPopulationLimit({ populationLimit: target });
+}
+
+export function getPopulationLimit(state) {
   // A geometry-based safety limit is separate from the visual fullness decision.
   const spacing = CONFIG.animalDiameter + CONFIG.animalGap;
   const area = CONFIG.logicalWidth * (CONFIG.logicalHeight - CONFIG.safeTop - CONFIG.safeBottom);
   const packedCircleArea = Math.PI * (spacing / 2) ** 2;
-  return Math.min(CONFIG.maxAnimals, Math.floor((area * CONFIG.packingAreaLimit) / packedCircleArea));
+  return Math.min(CONFIG.maxAnimals, state?.populationLimit ?? CONFIG.stageOneEndMax,
+    Math.floor((area * CONFIG.packingAreaLimit) / packedCircleArea));
 }
 
 function selectSparseParents(animals, count) {

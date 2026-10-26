@@ -3,7 +3,7 @@ import { SPECIES, loadAnimalSprites, findAnimalAt, updateAnimalAnimations } from
 import { beginBreedingPulse, advanceBreedingPulse, getBreedingTiming, measureDensity } from "./breeding.js";
 import { createCanvasRenderer } from "./canvas-renderer.js";
 import { adoptAnimal, updateParticles } from "./particles.js";
-import { createState, startRound, captureStageOne, beginStageOneFinish, isStageOneFinishReady, beginCapacityNotice, advanceCapacityNotice } from "./state.js";
+import { createState, startRound, captureStageOne, beginStageOneFinish, isStageOneFinishReady, beginCapacityNotice, confirmCapacityNotice } from "./state.js";
 import { createPhysicsStage } from "./physics-stage.js";
 import { createReveal, updateReveal, revealVisualAt, REVEAL_CONFIG } from "./reveal.js";
 import { drawExitIcon } from "./physics-renderer.js";
@@ -96,9 +96,8 @@ restartButton.addEventListener("click", beginRound);
 physicsRetry.addEventListener("click", () => enterPhysics(true));
 document.querySelector("#reveal-restart").addEventListener("click", beginRound);
 document.querySelector("#ending-restart").addEventListener("click", beginRound);
-document.querySelector("#capacity-restart").addEventListener("click", beginRound);
 capacityContinue.addEventListener("click", () => {
-  if (state.mode === "capacity") enterPhysics();
+  if (confirmCapacityNotice(state)) enterPhysics();
 });
 window.addEventListener("resize", () => { cancelPointer(); renderer?.resize(); });
 window.addEventListener("blur", pausePhysics);
@@ -268,7 +267,12 @@ function updatePhysicsHud() {
   else if (physics.status === "pulling") hint = physics.pull >= PHYSICS_CONFIG.minPull
     ? t("physics.charge", { percent: Math.round(physics.pull / PHYSICS_CONFIG.maxPull * 100) })
     : t("physics.pullMore");
-  else hint = t("physics.ready");
+  else {
+    const lastOutcome = physics.outcomes.at(-1);
+    hint = lastOutcome
+      ? t("physics.tryVariation", { percent: Math.round(lastOutcome.pullDistance / PHYSICS_CONFIG.maxPull * 100) })
+      : t("physics.ready");
+  }
   if (physicsStatus.textContent !== hint) physicsStatus.textContent = hint;
   const progress = t("physics.progress", { count: physics.launched });
   if (physicsProgress.textContent !== progress) physicsProgress.textContent = progress;
@@ -329,7 +333,10 @@ function showEnding(animationError = false) {
     const count = document.createElement("strong"); count.textContent = String(state.reveal.counts[i]);
     count.dataset.count = String(state.reveal.counts[i]);
     const percent = document.createElement("small"); percent.textContent = `${(state.reveal.percentages[i] / 10).toFixed(1)}%`;
-    card.append(title, count, percent);
+    const description = document.createElement("p"); description.className = "result-description";
+    description.dataset.i18n = `fate.description.${i}`;
+    description.textContent = t(`fate.description.${i}`);
+    card.append(title, count, percent, description);
     return card;
   }));
   updateEndingText();
@@ -404,8 +411,6 @@ function frame(timestamp) {
         updateHud(true);
       }
     }
-
-    if (advanceCapacityNotice(state, dt, document.hidden)) enterPhysics();
 
     if (state.mode === "physics" && !document.hidden) {
       state.physics?.update(dt);

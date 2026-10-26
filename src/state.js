@@ -1,6 +1,6 @@
 import { CONFIG } from "./config.js";
 import { SPECIES, createAnimal } from "./animals.js";
-import { isScreenSaturated, getPopulationLimit } from "./breeding.js";
+import { isScreenSaturated, getBreedingTiming, samplePopulationLimit } from "./breeding.js";
 
 export function createState() {
   return {
@@ -8,6 +8,7 @@ export function createState() {
     animals: [],
     particles: [],
     adoptedCount: 0,
+    populationLimit: null,
     elapsedMs: 0,
     nextBreedAt: CONFIG.breedIntervalMs,
     breedRound: 0,
@@ -18,7 +19,7 @@ export function createState() {
     pendingParents: [],
     pendingParentIndex: 0,
     pendingBirthAt: null,
-    capacityElapsedMs: 0,
+    capacityConfirmed: false,
     lastHudUpdateAt: 0,
     density: 0,
     physics: null,
@@ -31,7 +32,7 @@ export function createState() {
   };
 }
 
-export function startRound(state) {
+export function startRound(state, { populationRandom = Math.random } = {}) {
   state.physics?.dispose();
   state.physics = null;
   state.stageOneSnapshot = [];
@@ -42,10 +43,11 @@ export function startRound(state) {
   state.reveal = null;
   state.mode = "active";
   state.animals = createInitialPopulation();
+  state.populationLimit = samplePopulationLimit(populationRandom);
   state.particles = [];
   state.adoptedCount = 0;
   state.elapsedMs = 0;
-  state.nextBreedAt = CONFIG.breedIntervalMs;
+  state.nextBreedAt = getBreedingTiming(1).intervalMs;
   state.breedRound = 0;
   state.breedingBusyUntil = 0;
   state.waveParentsStarted = 0;
@@ -54,14 +56,13 @@ export function startRound(state) {
   state.pendingParents = [];
   state.pendingParentIndex = 0;
   state.pendingBirthAt = null;
-  state.capacityElapsedMs = 0;
+  state.capacityConfirmed = false;
   state.lastHudUpdateAt = 0;
   state.density = 0;
 }
 
 export function beginStageOneFinish(state) {
-  if (state.mode !== "active" ||
-    (!isScreenSaturated(state) && state.animals.length < getPopulationLimit())) return false;
+  if (state.mode !== "active" || !isScreenSaturated(state)) return false;
   // Latch once: falling density during redistribution must not re-enable input.
   state.mode = "finishing";
   return true;
@@ -78,15 +79,14 @@ export function beginCapacityNotice(state) {
   // final wave when entering from the real finishing state.
   if (state.mode !== "active" && !isStageOneFinishReady(state)) return false;
   state.mode = "capacity";
-  state.capacityElapsedMs = 0;
+  state.capacityConfirmed = false;
   return true;
 }
 
-export function advanceCapacityNotice(state, dt, paused = false) {
-  if (state.mode !== "capacity" || paused) return false;
-  state.capacityElapsedMs = Math.min(CONFIG.capacityNoticeMs,
-    state.capacityElapsedMs + Math.max(0, Math.min(dt, 0.05)) * 1000);
-  return state.capacityElapsedMs >= CONFIG.capacityNoticeMs - 1e-6;
+export function confirmCapacityNotice(state) {
+  if (state.mode !== "capacity" || state.capacityConfirmed) return false;
+  state.capacityConfirmed = true;
+  return true;
 }
 
 export function captureStageOne(state) {
@@ -94,7 +94,8 @@ export function captureStageOne(state) {
   state.stageOneSnapshot = Object.freeze(state.animals.map(({ species, x, y, phase }) =>
     Object.freeze({ species, x, y, phase }),
   ));
-  state.stageOneSummary = Object.freeze({ adoptedCount: state.adoptedCount, elapsedMs: state.elapsedMs });
+  state.stageOneSummary = Object.freeze({ adoptedCount: state.adoptedCount, elapsedMs: state.elapsedMs,
+    populationLimit: state.populationLimit });
   const candidates = [...state.stageOneSnapshot];
   for (let i = candidates.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

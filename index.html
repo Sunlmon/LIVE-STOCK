@@ -24,7 +24,7 @@
             <p class="cover-description" data-i18n="cover.description">一次关于「清空」的互动实验。</p>
             <div class="cover-action">
               <button class="start-button" id="start-button" type="button">
-                <span>START</span><span class="start-arrow" aria-hidden="true">↗</span>
+                <span class="start-label">START</span>
               </button>
               <p class="cover-start-hint" data-i18n="cover.hint">点击，开始领养</p>
             </div>
@@ -83,10 +83,8 @@
           <h2 id="capacity-title"><span data-i18n="capacity.lineOne">动物数量太多了，</span><br /><span data-i18n="capacity.lineTwo">已经超出承受能力。</span></h2>
           <p id="capacity-description" data-i18n="capacity.description">领养的速度，已经追不上繁育的速度。</p>
           <div class="capacity-actions">
-            <button class="capacity-continue" id="capacity-continue" type="button" data-i18n="capacity.continue">进入分流装置 →</button>
-            <button class="physics-button" id="capacity-restart" type="button" data-i18n="button.restart">重新开始</button>
+            <button class="capacity-continue" id="capacity-continue" type="button" data-i18n="capacity.continue">确认</button>
           </div>
-          <p class="capacity-timing" data-i18n="capacity.timing">稍后自动进入，也可点击继续。</p>
         </section>
 
         <header class="reveal-hud" id="reveal-hud" hidden>
@@ -128,7 +126,7 @@
             </div>
           </section>
           <p class="ending-note" id="ending-error" role="alert" data-i18n="ending.error" hidden>结尾动画未能完整播放。已保留本轮模拟结果，你可以重新开始。</p>
-          <button class="ending-restart" id="ending-restart" type="button" data-i18n="button.endingRestart">重新开始 ↗</button>
+          <button class="ending-restart" id="ending-restart" type="button" data-i18n="button.endingRestart">重新开始</button>
         </div>
       </section>
     </main>

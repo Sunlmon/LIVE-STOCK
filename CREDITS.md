@@ -1,8 +1,24 @@
-# Credits
+# Credits / 引用与素材说明
 
-- Animal silhouettes: original simplified SVG vector artwork created for this WIP 1 prototype; no external image assets were used.
-- Audio: none used in WIP 1.
-- Physics: [Matter.js 0.20.0](https://github.com/liabru/matter-js/tree/0.20.0), by Liam Brummitt and contributors, MIT license. The unmodified browser build and full license are included in `vendor/`. See [vendor/README.md](vendor/README.md) for the exact source and checksum.
-- Other implementation: browser-native HTML, CSS, JavaScript, Canvas 2D and Pointer Events. No external media, audio, online service or account is required for WIP 2.
-- Stage-two layout reference: a user-supplied photograph of a traditional pinboard inspired the portrait board, staggered pins and bottom lanes. The photograph is not included as an asset; the board is drawn with Canvas. Decorative side animals reuse this project's cover SVG sprites.
-- Stage-three symbols and skull: original Canvas vector linework, reusing the four existing outlet motifs. No external skull image, emoji, sound or model is used. The four equal simulation weights are illustrative creative parameters, not a dataset or researched real-world fate frequencies.
+## 第三方代码
+
+- **Matter.js 0.20.0**，Liam Brummitt 与贡献者，MIT 许可证。[官方版本源码](https://github.com/liabru/matter-js/tree/0.20.0)。未修改的浏览器构建与完整许可证分别位于 `vendor/matter-0.20.0.min.js`、`vendor/MATTER-LICENSE.txt`；版本来源与校验值见 [vendor/README.md](vendor/README.md)。它负责弹簧活塞、重力与碰撞，不负责决定模拟结局概率。
+- 其余使用浏览器原生 HTML、CSS、JavaScript、Canvas 2D、Pointer Events 和 `localStorage`；测试使用 Node.js 内置测试工具，没有额外 npm 依赖。
+
+## 动物图形与视觉参考
+
+- 六种动物是为本项目在 `src/animals.js` 中编写的 SVG 线条图形，由作者提出造型与修订方向，Codex 协助实现。最终图形为猫、狗、兔子、圆脸仓鼠、鹦鹉与金鱼，没有使用 emoji 或从参考截图裁出的图片。
+- 造型受作者在开发对话中提供的黑色动物线稿参考图启发。参考图的原作者、原始链接与许可证未完整记录；**不能据此声称参考素材为原创或已经取得授权**。参考截图本身未作为网站素材分发。提交前应尽可能补齐来源与使用权限，不能把“用代码重画”当作许可替代。
+- 纵向弹珠板、交错碰撞钉与底部槽道参考了作者提供的一张传统钉板装置照片。照片未打包进项目，装置由 Canvas 绘制。照片原作者与原始链接同样尚未记录。
+- 两侧动物复用本项目 SVG。金属、亚克力和阴影为 Canvas/CSS 绘制，不使用外部纹理、字体文件或 3D 模型。
+- 当前按钮的视觉参考为作者提供的紫色胶囊按钮截图；在 CSS 中重建为高级灰渐变、高光与光晕，不嵌入或分发原截图。截图原作者与原始链接尚未提供，不能据此声称该参考图为原创或已获得授权。
+- 四类出口图标与骷髅为项目中的矢量绘制；结尾复用同一套出口符号。仓库截图是本项目画面的记录，不包含真人试玩者影像。
+
+## 数据、课程与工具
+
+- 项目为个人 Assignment 3 “An interactive experience”。课程作业说明约束交互、试玩与过程记录；本项目没有直接复制未修改的课程示例作为作品。若后续发现借用的示例代码，应在此补充具体文件与来源。
+- 四类等权分配是创作模拟参数，不引用或代表真实动物结局数据集。只有四球实际出口属于本轮真实物理记录。
+- ChatGPT / Codex 用于开发协助、测试与文档整理，具体使用与保留 / 修改的建议见 [PROCESS.md](PROCESS.md)。这不是零 AI 使用的项目，也不依赖运行时 AI 服务。
+- 没有使用音频、录像素材、在线图片服务、账号或付费 API；没有上传试玩者姓名、照片或录音。
+
+除 Matter.js 明确的 MIT 许可外，本文件不为整个项目或未确认来源的参考图额外授予许可。
