@@ -23,6 +23,7 @@ export function createState() {
     lastHudUpdateAt: 0,
     density: 0,
     physics: null,
+    physicsCompletion: null,
     stageOneSnapshot: [],
     stageOneSummary: null,
     physicsRepresentatives: [],
@@ -35,6 +36,7 @@ export function createState() {
 export function startRound(state, { populationRandom = Math.random } = {}) {
   state.physics?.dispose();
   state.physics = null;
+  state.physicsCompletion = null;
   state.stageOneSnapshot = [];
   state.stageOneSummary = null;
   state.physicsRepresentatives = [];

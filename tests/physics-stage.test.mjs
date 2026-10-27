@@ -22,7 +22,7 @@ function finishFlight(stage, dt = 1 / 120) {
   let steps = 0;
   let maxLaunchSpeed = 0;
   let returns = 0;
-  while (["flight", "returned"].includes(stage.state.status) && steps++ < 12000) {
+  while (["flight", "returned", "processing"].includes(stage.state.status) && steps++ < 12000) {
     if (stage.state.status === "returned") {
       assert.ok(returns < 8, "too many returns in the fixed-input test");
       // Test-user lever inputs only; production never relaunches automatically.
@@ -331,6 +331,7 @@ test("four visits to the same outlet each flash once and return to default witho
     const off = getOutletFlash(stage.state, 0);
     assert.equal(off.intensity, 0);
     stage.state.elapsedMs += 500;
+    while (stage.state.status === "processing") stage.update(1 / 120);
     assert.deepEqual(getOutletFlash(stage.state, 0), off);
     assert.equal(getOutletFlash(stage.state, 1).triggers, 0);
     assert.equal(Matter.Composite.allBodies(stage.engine.world).length, initialBodyCount - (shot === 4 ? 1 : 0));

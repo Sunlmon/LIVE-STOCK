@@ -140,24 +140,44 @@ function acrylic(ctx, x, y, w, h) {
 }
 
 export function drawOutletPlate(ctx, exit, flash) {
-  const x = exit.left + 7, y = 983, w = exit.right - exit.left - 14;
+  const x = exit.left + 2, y = L.exitY, w = exit.right - exit.left - 4;
   ctx.save();
-  ctx.fillStyle = "#a7a6a3"; rect(ctx, x, y, w, 57, 3); ctx.fill();
-  ctx.fillStyle = "#b2b1a9";
-  rect(ctx, x + 1, y + 2, w - 2, 54, 2); ctx.fill();
-  // A brief collection pulse, not a persistent active/closed face or collider.
-  ctx.save(); rect(ctx, x + 2, y + 3, w - 4, 51, 2); ctx.clip();
+  shadow(ctx, 0.19, 4, 2);
+  ctx.fillStyle = "#93958e"; rect(ctx, x, y, w, 66, 3); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = gradient(ctx, x, y, w, 66, ["#bdbfb7", M.silver, "#8f9189"]);
+  rect(ctx, x + 1, y + 1, w - 2, 63, 2); ctx.fill();
+  // Recessed rear, side walls and dark lower shaft are optical depth only.
+  ctx.fillStyle = gradient(ctx, 0, y + 5, 0, 58, ["#64675f", "#42453e", "#23251f"]);
+  rect(ctx, x + 6, y + 5, w - 12, 56, 2); ctx.fill();
+  ctx.fillStyle = "#74776e";
+  polygon(ctx, [{x:x+6,y:y+5},{x:x+15,y:y+13},{x:x+15,y:y+51},{x:x+6,y:y+61}]); ctx.fill();
+  ctx.fillStyle = "#383b34";
+  polygon(ctx, [{x:x+w-6,y:y+5},{x:x+w-15,y:y+13},{x:x+w-15,y:y+51},{x:x+w-6,y:y+61}]); ctx.fill();
+  ctx.fillStyle = "rgba(18,20,16,0.28)"; ctx.fillRect(x + 15, y + 47, w - 30, 13);
   if (flash.intensity > 0) {
-    ctx.globalAlpha = flash.intensity * 0.42;
-    ctx.fillStyle = M.amber;
-    ctx.fillRect(x + 2, y + 3, w - 4, 51);
+    ctx.save(); ctx.globalAlpha = flash.intensity * 0.4;
+    ctx.strokeStyle = M.amber; ctx.lineWidth = 1.4;
+    rect(ctx, x + 5, y + 4, w - 10, 58, 2); ctx.stroke(); ctx.restore();
   }
+  ctx.strokeStyle = "rgba(244,243,235,0.62)"; ctx.lineWidth = 1.1;
+  ctx.beginPath(); ctx.moveTo(x + 2, y + 2); ctx.lineTo(x + w - 2, y + 2); ctx.stroke();
+  ctx.strokeStyle = "rgba(20,23,18,0.55)";
+  rect(ctx, x + 6, y + 5, w - 12, 56, 2); ctx.stroke();
   ctx.restore();
-  ctx.strokeStyle = "#cbc9bf";
-  ctx.lineWidth = 1.2;
-  rect(ctx, x + 2, y + 2, w - 4, 53, 2); ctx.stroke();
-  ctx.strokeStyle = "#a1a09d";
-  ctx.beginPath(); ctx.moveTo(x + 8, y + 53); ctx.lineTo(x + w - 8, y + 53); ctx.stroke();
+}
+
+export function drawOutletGate(ctx, exit, openness = 0) {
+  const x = exit.left + 9, y = L.exitY + 51, w = exit.right - exit.left - 18;
+  ctx.save(); rect(ctx, x, y - 1, w, 13, 1); ctx.clip();
+  ctx.fillStyle = "#1f211d"; ctx.fillRect(x, y - 1, w, 13);
+  const travel = w * 0.5 * openness;
+  for (const side of [-1, 1]) {
+    const px = side < 0 ? x - travel : x + w / 2 + travel;
+    ctx.fillStyle = gradient(ctx, 0, y, 0, 11, ["#c1c3b9", "#94978c", "#72766b"]);
+    ctx.fillRect(px, y, w / 2, 11);
+    ctx.strokeStyle = "#d8d9d1"; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(px + 1, y + 0.6); ctx.lineTo(px + w / 2 - 1, y + 0.6); ctx.stroke();
+  }
   ctx.restore();
 }
 

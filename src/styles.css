@@ -667,6 +667,26 @@ button:disabled { cursor: default; opacity: 0.78; }
   clip-path: inset(50%);
   white-space: nowrap;
 }
+.physics-completion-screen {
+  position: fixed;
+  z-index: 5;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 32px;
+  padding: 24px;
+  pointer-events: auto;
+  opacity: 0;
+}
+.physics-completion-screen p {
+  margin: 0;
+  color: #62645f;
+  font-size: clamp(26px, 4vw, 48px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
 .ending-screen {
   position: fixed;
   z-index: 6;

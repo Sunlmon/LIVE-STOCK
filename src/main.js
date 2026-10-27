@@ -5,7 +5,8 @@ import { createCanvasRenderer } from "./canvas-renderer.js";
 import { adoptAnimal, updateParticles } from "./particles.js";
 import { createState, startRound, captureStageOne, beginStageOneFinish, isStageOneFinishReady, beginCapacityNotice, confirmCapacityNotice } from "./state.js";
 import { createPhysicsStage } from "./physics-stage.js";
-import { createReveal, updateReveal, revealVisualAt, REVEAL_CONFIG } from "./reveal.js";
+import { createReveal, updateReveal, revealVisualAt } from "./reveal.js";
+import { beginPhysicsCompletion, updatePhysicsCompletion, confirmPhysicsCompletion, completionVisualAt } from "./physics-completion.js";
 import { drawExitIcon } from "./physics-renderer.js";
 import { translate, getFateLabels, localizePhysicsError, normalizeLanguage,
   readLanguagePreference, saveLanguagePreference, applyTranslations } from "./i18n.js";
@@ -33,6 +34,8 @@ const resultSummary = document.querySelector("#result-summary");
 const physicalSummary = document.querySelector("#physical-summary");
 const capacityScreen = document.querySelector("#capacity-screen");
 const capacityContinue = document.querySelector("#capacity-continue");
+const physicsCompletionScreen = document.querySelector("#physics-completion-screen");
+const physicsResultsButton = document.querySelector("#physics-results-button");
 
 if (coverAnimals) {
   coverAnimals.innerHTML = SPECIES.map((species, index) =>
@@ -74,7 +77,8 @@ refreshLanguage();
 
 function refreshLanguage() {
   applyTranslations(document, language);
-  const canvasKey = state.mode === "physics" ? "canvas.physics" : state.mode === "reveal" ? "canvas.reveal" : "canvas.active";
+  const canvasKey = state.mode === "physics-complete" ? "physics.completionTitle" :
+    state.mode === "physics" ? "canvas.physics" : state.mode === "reveal" ? "canvas.reveal" : "canvas.active";
   canvas.setAttribute("aria-label", t(canvasKey));
   if (state.mode === "physics") updatePhysicsHud();
   if (state.mode === "reveal") updateRevealStatus();
@@ -98,6 +102,12 @@ document.querySelector("#reveal-restart").addEventListener("click", beginRound);
 document.querySelector("#ending-restart").addEventListener("click", beginRound);
 capacityContinue.addEventListener("click", () => {
   if (confirmCapacityNotice(state)) enterPhysics();
+});
+physicsResultsButton.addEventListener("click", () => {
+  if (!confirmPhysicsCompletion(state)) return;
+  hidePhysicsCompletion();
+  state.physicsCompletion = null;
+  enterReveal();
 });
 window.addEventListener("resize", () => { cancelPointer(); renderer?.resize(); });
 window.addEventListener("blur", pausePhysics);
@@ -166,6 +176,7 @@ function beginRound() {
   physicsHud.hidden = true;
   revealHud.hidden = true;
   endingScreen.hidden = true;
+  hidePhysicsCompletion();
   hideCapacityNotice();
   resultList.replaceChildren();
   resultSummary.textContent = "";
@@ -220,6 +231,8 @@ function showCapacityNotice() {
 
 function enterPhysics(retry = false) {
   cancelPointer();
+  hidePhysicsCompletion();
+  state.physicsCompletion = null;
   hideCapacityNotice();
   state.physics?.dispose();
   state.physics = null;
@@ -261,6 +274,7 @@ function updatePhysicsHud() {
   }
   let hint;
   if (physics.status === "complete") hint = t("physics.complete");
+  else if (physics.status === "processing") hint = t("physics.processing");
   else if (physics.status === "error") hint = localizePhysicsError(language, physics.error);
   else if (physics.status === "flight") hint = t("physics.flight");
   else if (physics.status === "returned") hint = t("physics.returned");
@@ -278,7 +292,30 @@ function updatePhysicsHud() {
   if (physicsProgress.textContent !== progress) physicsProgress.textContent = progress;
   physicsStatus.classList.toggle("is-error", physics.status === "error");
   physicsStatus.classList.toggle("is-charged", physics.status === "pulling" && physics.pull >= PHYSICS_CONFIG.minPull);
-  physicsRetry.hidden = !["complete", "error"].includes(physics.status);
+  physicsRetry.hidden = physics.status !== "error";
+}
+
+function hidePhysicsCompletion() {
+  physicsCompletionScreen.hidden = true;
+  physicsCompletionScreen.inert = true;
+  physicsResultsButton.disabled = true;
+  physicsCompletionScreen.style.opacity = "0";
+  physicsHud.style.opacity = "";
+  physicsHud.inert = false;
+  canvas.inert = false;
+}
+
+function showPhysicsCompletion() {
+  if (!beginPhysicsCompletion(state)) return;
+  cancelPointer();
+  physicsHud.inert = true;
+  physicsRetry.hidden = true;
+  canvas.inert = true;
+  canvas.setAttribute("aria-label", t("physics.completionTitle"));
+  physicsCompletionScreen.hidden = false;
+  physicsCompletionScreen.inert = true;
+  physicsResultsButton.disabled = true;
+  physicsCompletionScreen.style.opacity = "0";
 }
 
 function enterReveal() {
@@ -415,10 +452,20 @@ function frame(timestamp) {
     if (state.mode === "physics" && !document.hidden) {
       state.physics?.update(dt);
       updatePhysicsHud();
-      const physics = state.physics?.state;
-      const lastOutcome = state.physicalOutcomes.at(-1);
-      if (physics?.status === "complete" && physics.resolved === PHYSICS_CONFIG.totalShots && lastOutcome &&
-        physics.elapsedMs - lastOutcome.passedAtMs >= REVEAL_CONFIG.entryDelayMs) enterReveal();
+      showPhysicsCompletion();
+    }
+
+    if (state.mode === "physics-complete" && !document.hidden) {
+      updatePhysicsCompletion(state, dt);
+      const visual = completionVisualAt(state.physicsCompletion.elapsedMs);
+      physicsHud.style.opacity = String(visual.machineAlpha);
+      physicsHud.hidden = visual.machineAlpha === 0;
+      physicsCompletionScreen.style.opacity = String(visual.textAlpha);
+      if (visual.ready && physicsResultsButton.disabled) {
+        physicsCompletionScreen.inert = false;
+        physicsResultsButton.disabled = false;
+        physicsResultsButton.focus({ preventScroll: true });
+      }
     }
 
     if (state.mode === "reveal" && !document.hidden) {
@@ -434,8 +481,15 @@ function frame(timestamp) {
       showEnding(true); // preserve valid simulation counts, offer a visible restart
       return;
     }
-    if (state.mode === "physics") {
+    if (state.mode === "physics" || state.mode === "physics-complete") {
       console.error("物理体验出错：", error);
+      if (state.mode === "physics-complete") {
+        hidePhysicsCompletion();
+        state.physicsCompletion = null;
+        state.mode = "physics";
+        physicsHud.hidden = false;
+        renderer?.resize();
+      }
       state.physics?.fail("装置运行中断，请重新体验本轮。");
       cancelPointer();
       updatePhysicsHud();

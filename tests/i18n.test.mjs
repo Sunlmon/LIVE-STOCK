@@ -31,9 +31,40 @@ test("every static HTML translation and accessibility label exists in both langu
   assert.equal(html.includes('id="capacity-restart"'), false);
   const main = await readFile(new URL("../src/main.js", import.meta.url), "utf8");
   assert.equal(main.includes('querySelector("#capacity-restart")'), false);
+  const completion = html.match(/<section[^>]*id="physics-completion-screen"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+  assert.ok(completion);
+  assert.equal([...completion.matchAll(/<button\b/g)].length, 1);
+  assert.ok(completion.includes('id="physics-results-button"'));
+  assert.ok(completion.includes('data-i18n="physics.viewResults"'));
+  assert.equal(MESSAGES.zh["physics.viewResults"], "查看结果");
+  assert.equal(MESSAGES.en["physics.viewResults"], "View results");
   const startMarkup = html.match(/<button[^>]*id="start-button"[^>]*>([\s\S]*?)<\/button>/)?.[1];
   assert.ok(startMarkup);
   assert.equal(/svg|start-index|start-contact|[↗→]/.test(startMarkup), false);
+});
+
+test("ending story connects demand, unsold lives, the lever metaphor and the call against overbreeding", async () => {
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const story = html.match(/<div class="ending-copy">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(story);
+  const keys = ["title", "lead", "market", "fates", "lever", "callToAction"];
+  let previous = -1;
+  for (const key of keys) {
+    const position = story.indexOf(`data-i18n="ending.${key}"`);
+    assert.ok(position > previous, `missing or out-of-order ending.${key}`);
+    previous = position;
+    assert.ok(story.includes(MESSAGES.zh[`ending.${key}`]), `Chinese fallback differs: ${key}`);
+  }
+  assert.match(MESSAGES.zh["ending.title"], /滞销动物/);
+  assert.match(MESSAGES.zh["ending.market"], /购买力缩减/);
+  assert.match(MESSAGES.zh["ending.fates"], /可能/);
+  assert.equal(MESSAGES.zh["ending.lever"], "你轻轻拉下杠杆，生命便开始滚动。在一次次碰撞与分流之间，它们被推向不同的去处。从诞生到终局，命运似乎始终握在他人手中。");
+  assert.match(MESSAGES.zh["ending.callToAction"], /停止过度繁育/);
+  assert.match(MESSAGES.en["ending.lever"], /lever.*collisions.*birth.*someone else's hands/);
+  assert.match(MESSAGES.en["ending.callToAction"], /Stop overbreeding/);
+  assert.match(MESSAGES.zh["ending.metaphor"], /不等同于死亡/);
+  assert.match(MESSAGES.en["ending.metaphor"], /does not mean death/);
+  assert.match(MESSAGES.zh["ending.weights"], /不是现实统计/);
 });
 
 test("dynamic numbers are interpolated without changing their values", () => {
@@ -107,7 +138,7 @@ test("DOM translation updates text, accessibility and pressed states without rep
   assert.equal(label["aria-label"], "Interface language");
   assert.deepEqual(buttons.map(button => button["aria-pressed"]), ["false", "true"]);
   applyTranslations(root, "zh");
-  assert.equal(node.textContent, "屏幕终于清空了。");
+  assert.equal(node.textContent, "看不见的滞销动物，去了哪里？");
   assert.equal(root.documentElement.lang, "zh-CN");
   assert.deepEqual(buttons.map(button => button["aria-pressed"]), ["true", "false"]);
 });

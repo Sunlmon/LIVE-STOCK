@@ -3,6 +3,7 @@ import { getAnimalCenter, getAnimalScale } from "./animals.js";
 import { drawPhysicsStage, drawPhysicsDecorations } from "./physics-renderer.js";
 import { fitPhysicsViewport, screenPointToPhysics } from "./physics-viewport.js";
 import { drawReveal } from "./reveal.js";
+import { completionVisualAt } from "./physics-completion.js";
 
 export function createCanvasRenderer(canvas, sprites, { physicsHud } = {}) {
   const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -39,8 +40,12 @@ export function createCanvasRenderer(canvas, sprites, { physicsHud } = {}) {
     context.fillStyle = COLORS.paper;
     context.fillRect(0, 0, viewport.width, viewport.height);
     context.save();
-    if (state.mode === "physics") {
+    if (state.mode === "physics" || state.mode === "physics-complete") {
       if (state.physics) {
+        if (state.mode === "physics-complete") {
+          context.globalAlpha = completionVisualAt(state.physicsCompletion.elapsedMs).machineAlpha;
+          if (context.globalAlpha === 0) { context.restore(); return; }
+        }
         drawPhysicsDecorations(context, sprites, reducedMotion.matches ? 0 : state.physics.state.elapsedMs, physicsViewport.decorations);
         context.translate(physicsViewport.offsetX, physicsViewport.offsetY);
         context.scale(physicsViewport.scale, physicsViewport.scale);

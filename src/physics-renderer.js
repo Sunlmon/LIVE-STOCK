@@ -1,7 +1,8 @@
 import { COLORS, PHYSICS_CONFIG as P } from "./config.js";
 import { SPECIES } from "./animals.js";
-import { drawMachineSurface, drawOutletPlate, drawMetalBall, drawMechanicalLauncher } from "./physics-materials.js";
+import { drawMachineSurface, drawOutletPlate, drawOutletGate, drawMetalBall, drawMechanicalLauncher } from "./physics-materials.js";
 import { getOutletFlash } from "./physics-feedback.js";
+import { activeOutletProcess, outletPose } from "./outlet-processing.js";
 
 export function drawPhysicsStage(ctx, physics, sprites) {
   ctx.save();
@@ -10,9 +11,15 @@ export function drawPhysicsStage(ctx, physics, sprites) {
   drawMachineSurface(ctx, physics);
   for (const exit of physics.exits) {
     const x = (exit.left + exit.right) / 2;
+    const event = activeOutletProcess(physics, exit.index);
+    const pose = event ? outletPose(event, exit, physics.elapsedMs) : null;
     drawOutletPlate(ctx, exit, getOutletFlash(physics, exit.index));
-    // One symbol spans each pair of lanes, below the actual detection line.
-    drawExitIcon(ctx, exit.index, x, 1010, COLORS.ink);
+    // The existing symbol is the rear-wall mark and the processed animal's target.
+    ctx.save();
+    ctx.globalAlpha *= pose ? (pose.phase === "close" ? 1 - pose.gate : 1 - pose.travel) : 1;
+    drawExitIcon(ctx, exit.index, x, 1006, "#b8bcb0"); ctx.restore();
+    if (event) drawOutletProcess(ctx, event, exit, pose, sprites);
+    drawOutletGate(ctx, exit, pose?.gate ?? 0);
   }
   drawMechanicalLauncher(ctx, physics);
   if (physics.active) {
@@ -33,10 +40,41 @@ export function drawPhysicsStage(ctx, physics, sprites) {
   ctx.restore();
 }
 
+export function drawOutletProcess(ctx, event, exit, pose, sprites) {
+  if (pose.complete || pose.phase === "close") return;
+  ctx.save();
+  // The removed animal is now only a picture inside its actual detected outlet.
+  ctx.beginPath(); ctx.rect(exit.left + 8, exit.y, exit.right - exit.left - 16, 63); ctx.clip();
+  const animal = () => drawMetalBall(ctx, sprites.get(event.species),
+    { position: { x: pose.x, y: pose.y }, angle: pose.angle }, P.animalDiameter);
+  const symbol = () => drawExitIcon(ctx, event.exitIndex, pose.x, pose.y, "#eceee2");
+  if (pose.transform === 0) animal();
+  else if (pose.transform === 1) symbol();
+  else {
+    // A travelling conversion front, with an 8px feather at the boundary.
+    // Shapes share a centre and are never crossfaded wholesale or swapped abruptly.
+    const top = pose.y - 28, bottom = pose.y + 28;
+    const edge = top - 4 + (bottom - top + 8) * pose.transform;
+    const slice = (from, to, alpha, paint) => {
+      if (to <= from || alpha <= 0) return;
+      ctx.save(); ctx.beginPath(); ctx.rect(exit.left, from, exit.right - exit.left, to - from); ctx.clip();
+      ctx.globalAlpha *= alpha; paint(); ctx.restore();
+    };
+    slice(top, Math.min(bottom, edge - 4), 1, symbol);
+    slice(Math.max(top, edge + 4), bottom, 1, animal);
+    for (let band = 0; band < 8; band++) {
+      const from = Math.max(top, edge - 4 + band), to = Math.min(bottom, edge - 3 + band);
+      const animalAlpha = (band + 0.5) / 8;
+      slice(from, to, animalAlpha, animal); slice(from, to, 1 - animalAlpha, symbol);
+    }
+  }
+  ctx.restore();
+}
+
 export function drawPhysicsDecorations(ctx, sprites, elapsedMs, positions) {
   // Decorative cover motifs only: no colliders, targets or population counts.
   ctx.save();
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha *= 0.5;
   for (const [i, species] of SPECIES.entries()) {
     const { x, y, diameter } = positions[i];
     const floatY = Math.sin(elapsedMs / 1400 + i * 1.7) * Math.min(6, diameter * 0.035);

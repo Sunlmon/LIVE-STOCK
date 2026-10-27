@@ -1,4 +1,5 @@
 import { PHYSICS_CONFIG as P, PHYSICS_LAYOUT as L } from "./config.js";
+import { outletVisualAt, hasPendingOutletProcesses } from "./outlet-processing.js";
 
 // This module never assigns a route or exit to a moving animal. Only Matter
 // integrates its motion, including the initial collision with the spring piston.
@@ -173,13 +174,17 @@ export function createPhysicsStage(Matter, representatives, outcomes = [], { ran
     state.exitFlashUntil = state.elapsedMs + 900;
     Composite.remove(engine.world, animal.body);
     // Queue visual feedback only after the actual body has been safely removed.
-    state.outletClosures.push({ shot: animal.shot, exitIndex, laneIndex: lane.index, startedAtMs: state.elapsedMs });
+    state.outletClosures.push({ shot: animal.shot, species: animal.species, exitIndex, laneIndex: lane.index,
+      fromX: animal.body.position.x, fromY: animal.body.position.y, fromAngle: animal.body.angle,
+      startedAtMs: state.elapsedMs, complete: false });
     state.active = null;
-    if (state.resolved >= P.totalShots) {
-      state.status = "complete";
-      Body.setStatic(piston, true);
-      state.pull = 0;
-    } else loadNext();
+    // The animal is no longer a collider. Processing and its gate are purely
+    // visual; wait for reset before loading the next unique animal.
+    state.status = "processing";
+    Body.setStatic(piston, true);
+    Body.setPosition(piston, { x: P.launchX, y: P.pistonRestY });
+    Body.setVelocity(piston, { x: 0, y: 0 });
+    state.pull = 0;
   }
 
   function fail(message) {
@@ -205,6 +210,17 @@ export function createPhysicsStage(Matter, representatives, outcomes = [], { ran
   }
 
   function step() {
+    if (state.status === "processing") {
+      state.elapsedMs += P.stepMs;
+      for (const event of state.outletClosures) {
+        if (!event.complete && outletVisualAt(state.elapsedMs - event.startedAtMs).complete) event.complete = true;
+      }
+      if (!hasPendingOutletProcesses(state)) {
+        if (state.resolved === P.totalShots) state.status = "complete";
+        else loadNext();
+      }
+      return; // No Engine.update or gate colliders during visual processing.
+    }
     const animal = state.active;
     if (state.status === "flight") {
       // Hooke's law + damping on the piston only. No launch force, position
@@ -247,14 +263,14 @@ export function createPhysicsStage(Matter, representatives, outcomes = [], { ran
   }
 
   function update(dt) {
-    if (disposed || state.status === "error") return;
+    if (disposed || ["error", "complete"].includes(state.status)) return;
     accumulator += Math.max(0, Math.min(dt * 1000, P.stepMs * P.maxSubsteps));
     let steps = 0;
     while (accumulator >= P.stepMs && steps < P.maxSubsteps) {
       step();
       accumulator -= P.stepMs;
       steps += 1;
-      if (state.status === "error") { accumulator = 0; break; }
+      if (["error", "complete"].includes(state.status)) { accumulator = 0; break; }
     }
   }
 

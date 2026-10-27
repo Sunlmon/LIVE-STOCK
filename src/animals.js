@@ -1,81 +1,51 @@
 import { CONFIG } from "./config.js";
 import { resolveAnimalPacking } from "./packing.js";
 
-const svg = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`;
-const outline = (body) => svg(`<g fill="none" stroke="#282A27" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${body}</g>`);
-const eyes = (y, spread = 12) => `<g fill="#282A27" stroke="none"><circle cx="${50 - spread}" cy="${y}" r="2.7"/><circle cx="${50 + spread}" cy="${y}" r="2.7"/></g>`;
-const littleMuzzle = (y) => `<path d="M46 ${y}Q50 ${y - 4} 54 ${y}Q53 ${y + 4} 50 ${y + 5}Q47 ${y + 4} 46 ${y}Z" fill="#282A27" stroke="none"/><path d="M50 ${y + 5}V${y + 9}M50 ${y + 9}Q45 ${y + 14} 41 ${y + 9}M50 ${y + 9}Q55 ${y + 14} 59 ${y + 9}" stroke-width="3.4"/>`;
+// Approved preview selection: B for five species; A for the parrot.
+// Self-contained SVGs are shared by the cover, Canvas sprites and side motifs.
+const outline = (variant, body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" data-icon-variant="${variant}"><g fill="#F1EFE8" stroke="#343530" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
 
-// Rounded, original monoline faces inspired by the user's reference sheet.
-// The circle, colour palette and Canvas sprite-loading mechanism stay shared.
 export const SPECIES = Object.freeze([
   {
     key: "cat",
     label: "猫",
-    svg: outline(`
-      <path d="M25 35Q20 24 23 15Q33 13 41 25Q50 22 59 25Q67 13 77 15Q80 24 75 35C84 44 86 56 80 69C75 81 63 86 50 86C37 86 25 81 20 69C14 56 16 44 25 35Z" fill="#F1EFE8"/>
-      <path d="M28 24 34 29M72 24 66 29M25 58 14 56M25 66 14 68M75 58 86 56M75 66 86 68" stroke-width="3.5"/>
-      ${eyes(49)}${littleMuzzle(59)}
+    svg: outline("b-cat", `
+      <path d="m25 39-3-27 21 17q7-2 14 0l21-17-3 27q9 11 1 27Q66 81 50 88Q34 81 24 66q-8-16 1-27Z" /><path d="m28 25 8 8m36-8-8 8M27 56 9 51m17 12-18 1m20 6-17 8m62-22 18-5m-17 12 18 1m-20 6 17 8" stroke-width="3.7" /><circle cx="39" cy="48" r="2.9" fill="#343530" stroke="none" /><circle cx="61" cy="48" r="2.9" fill="#343530" stroke="none" /><path d="m45 59 5 5 5-5Z" fill="#343530" stroke="none" /><path d="M50 64v6m0 0q-5 7-10 1m10-1q5 7 10 1" stroke-width="3.4" />
     `),
   },
   {
     key: "dog",
     label: "狗",
-    svg: outline(`
-      <path d="M31 27C21 19 10 28 13 43L18 57Q23 64 29 55M69 27C79 19 90 28 87 43L82 57Q77 64 71 55" fill="#F1EFE8"/>
-      <path d="M28 32Q32 20 50 20Q68 20 72 32L77 55C79 75 66 87 50 87C34 87 21 75 23 55Z" fill="#F1EFE8"/>
-      ${eyes(48)}
-      <ellipse cx="50" cy="66" rx="14" ry="12" stroke-width="3.5"/>
-      <path d="M45 59Q50 55 55 59Q55 65 50 65Q45 65 45 59Z" fill="#282A27" stroke="none"/>
-      <path d="M50 65V73M50 70Q45 75 41 70M50 70Q55 75 59 70" stroke-width="3.3"/>
+    svg: outline("b-dog", `
+      <path d="M30 25C20 19 10 28 11 40L12 64Q19 77 29 64M70 25C80 19 90 28 89 40L88 64Q81 77 71 64" /><path d="M28 34Q28 23 50 23Q72 23 72 34L77 59Q80 83 65 86H35Q20 83 23 59Z" /><circle cx="36" cy="46" r="2.8" fill="#343530" stroke="none" /><circle cx="64" cy="46" r="2.8" fill="#343530" stroke="none" /><path d="M29 63Q29 54 50 54Q71 54 71 63v4Q71 78 50 79Q29 78 29 67Z" stroke-width="3.6" /><path d="M42 57Q50 53 58 57Q58 66 50 67Q42 66 42 57Z" fill="#343530" stroke="none" /><path d="M50 67v5m0 0q-6 5-11 0m11 0q6 5 11 0" stroke-width="3.3" />
     `),
   },
   {
     key: "rabbit",
     label: "兔子",
-    svg: outline(`
-      <path d="M33 42C25 26 25 9 32 8C40 7 45 24 44 40M56 40C55 24 60 7 68 8C75 9 75 26 67 42" fill="#F1EFE8"/>
-      <path d="M33 20Q33 27 37 35M67 20Q67 27 63 35" stroke-width="3.3"/>
-      <ellipse cx="50" cy="63" rx="29" ry="24" fill="#F1EFE8"/>
-      ${eyes(56, 11)}${littleMuzzle(66)}
-      <path d="M24 65 13 62M24 72 13 74M76 65 87 62M76 72 87 74" stroke-width="3.3"/>
+    svg: outline("b-rabbit", `
+      <path d="M35 49C22 23 25 6 32 6Q42 7 45 46M55 46Q58 7 68 6C75 6 78 23 65 49" /><path d="m33 20 6 21m28-21-6 21" stroke-width="3.3" /><path d="M50 45Q29 45 29 64Q30 88 50 92Q70 88 71 64Q71 45 50 45Z" /><circle cx="40" cy="60" r="2.8" fill="#343530" stroke="none" /><circle cx="60" cy="60" r="2.8" fill="#343530" stroke="none" /><path d="m46 70 4 4 4-4Z" fill="#343530" stroke="none" /><path d="M50 74v5m-5 0v5h10v-5m-5 0v5" stroke-width="3" />
     `),
   },
   {
     key: "hamster",
     label: "仓鼠",
-    svg: outline(`
-      <circle cx="29" cy="28" r="8.5" fill="#F1EFE8"/><circle cx="71" cy="28" r="8.5" fill="#F1EFE8"/>
-      <path d="M25 43C25 30 36 23 50 23C64 23 75 30 75 43C86 46 91 57 86 68C82 80 66 87 50 87C34 87 18 80 14 68C9 57 14 46 25 43Z" fill="#F1EFE8"/>
-      ${eyes(47, 11)}
-      <path d="M29 57C19 54 17 68 29 73M71 57C81 54 83 68 71 73" stroke-width="3.2"/>
-      <path d="M46 56Q50 52 54 56Q52 60 50 61Q48 60 46 56Z" fill="#282A27" stroke="none"/>
-      <path d="M50 61V64M50 64Q46 68 42 64M50 64Q54 68 58 64" stroke-width="3.2"/>
-      <path d="M47 67V72Q50 74 53 72V67M50 68V73" stroke-width="2.7"/>
+    svg: outline("b-hamster", `
+      <circle cx="29" cy="29" r="6.8" /><circle cx="71" cy="29" r="6.8" /><path d="M25 43Q26 26 50 27Q74 26 75 43C93 44 96 63 86 76Q75 89 50 89Q25 89 14 76C4 63 7 44 25 43Z" /><circle cx="39" cy="47" r="2.9" fill="#343530" stroke="none" /><circle cx="61" cy="47" r="2.9" fill="#343530" stroke="none" /><path d="M29 57Q17 57 20 69Q22 77 32 76M71 57Q83 57 80 69Q78 77 68 76" stroke-width="3.4" /><path d="M46 56Q50 53 54 56q0 5-4 6-4-1-4-6Z" fill="#343530" stroke="none" /><path d="M50 62v4m0 0q-5 6-10 0m10 0q5 6 10 0m-13 6v6h6v-6" stroke-width="3.1" />
     `),
   },
   {
     key: "bird",
     label: "鹦鹉",
-    svg: outline(`
-      <path d="M31 69C19 60 18 41 28 28C38 16 55 15 68 23C78 30 81 41 77 52L71 69C62 83 43 86 31 69Z" fill="#F1EFE8"/>
-      <path d="M49 25C36 25 29 36 31 49C34 62 47 68 61 61" stroke-width="3.2"/>
-      <circle cx="51" cy="39" r="7.2" stroke-width="3"/>
-      <circle cx="51" cy="39" r="2.8" fill="#282A27" stroke="none"/>
-      <path d="M65 42C74 32 88 38 88 49C88 59 81 68 75 69C81 59 76 53 66 54Z" fill="#F1EFE8"/>
-      <path d="M66 55Q73 61 73 69Q63 69 59 61" fill="#F1EFE8" stroke-width="3.5"/>
-      <path d="M34 75Q34 83 28 88L49 85Q61 84 69 76" fill="#F1EFE8" stroke-width="4"/>
+    svg: outline("a-parrot", `
+      <path d="M30 73C17 63 18 39 29 27Q43 12 64 22Q78 29 76 43L69 66Q64 77 52 79L33 87l3-13Z" /><path d="M34 22q-2-7 5-10l5 9" /><path d="M62 40Q78 31 88 42Q94 55 76 67Q80 54 63 52Z" /><path d="M64 54q10 6 7 14l-10-5" stroke-width="3.3" /><path d="M43 29Q29 38 35 53Q40 65 54 64" stroke-width="3.2" /><circle cx="48" cy="39" r="3.4" fill="#343530" stroke="none" />
     `),
   },
   {
     key: "goldfish",
     label: "金鱼",
-    svg: outline(`
-      <path d="M30 46C18 31 9 34 13 48Q17 54 13 60C9 75 18 78 30 62Z" fill="#F1EFE8"/>
-      <path d="M48 32Q46 18 57 20L68 33M48 77Q46 89 57 87L68 76" fill="#F1EFE8"/>
-      <path d="M27 54C27 39 41 29 58 30C75 31 85 41 86 54C85 69 74 79 58 79C41 80 27 70 27 54Z" fill="#F1EFE8"/>
-      <circle cx="69" cy="48" r="3.1" fill="#282A27" stroke="none"/>
-      <path d="M79 61Q76 65 72 62M58 44Q51 54 58 64M44 48Q34 54 44 60" stroke-width="3.3"/>
+    svg: outline("b-goldfish", `
+      <path d="M32 46 9 28Q13 41 17 51Q13 63 9 76L32 59Z" /><path d="M43 33 52 18 65 33m-21 39 12 15 12-16" /><path d="M27 52C36 33 50 28 64 33Q82 39 91 52Q82 67 64 72C50 77 36 71 27 52Z" /><path d="M62 39Q54 52 62 66m-16-20-8 6 8 6" stroke-width="3.5" /><circle cx="75" cy="47" r="3.2" fill="#343530" stroke="none" />
     `),
   },
 ]);

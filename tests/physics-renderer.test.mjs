@@ -28,7 +28,7 @@ function drawingTrace() {
     drawImage(image) { images.push({ species: image.species, x: this.x, y: this.y, alpha: this.globalAlpha }); },
   };
   for (const name of ["rotate", "strokeRect", "fillRect", "beginPath", "arc", "stroke", "fill",
-    "setLineDash", "moveTo", "lineTo", "closePath", "fillText", "roundRect", "bezierCurveTo", "clip"]) ctx[name] = () => {};
+    "setLineDash", "moveTo", "lineTo", "closePath", "fillText", "roundRect", "rect", "bezierCurveTo", "clip"]) ctx[name] = () => {};
   ctx.createLinearGradient = ctx.createRadialGradient = () => ({ addColorStop() {} });
   return { ctx, images };
 }
@@ -83,5 +83,25 @@ test("metal surface cache is reused across frames and rebuilt only when raster s
   assert.equal(created, 2);
   drawMachineSurface(trace.ctx, stage.state);
   assert.equal(created, 2);
+  stage.dispose();
+});
+
+test("all four processing visuals render without mutating physics and inherit machine fade opacity", () => {
+  const stage = createPhysicsStage(Matter, SPECIES.slice(0, 4).map(s => ({ species: s.key })));
+  const sprites = new Map(SPECIES.map(s => [s.key, { species: s.key, complete: true, naturalWidth: 100 }]));
+  const worldBefore = worldSignature(stage);
+  stage.state.active = null;
+  for (let exitIndex = 0; exitIndex < 4; exitIndex++) {
+    stage.state.outletClosures = [{ exitIndex, species: "cat", fromX: stage.state.exits[exitIndex].left + 30,
+      fromY: 1004, fromAngle: 0.4, startedAtMs: 0, complete: false }];
+    for (const ms of [0, 100, 330, 520, 650, 900, 1150, 1300]) {
+      stage.state.elapsedMs = ms;
+      const trace = drawingTrace(); trace.ctx.globalAlpha = 0.3;
+      drawPhysicsStage(trace.ctx, stage.state, sprites);
+      assert.equal(trace.ctx.globalAlpha, 0.3);
+      assert.ok(trace.images.every(image => image.alpha <= 0.3));
+      assert.equal(worldSignature(stage), worldBefore);
+    }
+  }
   stage.dispose();
 });

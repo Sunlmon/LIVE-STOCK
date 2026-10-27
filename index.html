@@ -101,6 +101,11 @@
         </p>
       </section>
 
+      <section class="physics-completion-screen" id="physics-completion-screen" role="dialog" aria-modal="true" aria-labelledby="physics-completion-title" hidden inert>
+        <p id="physics-completion-title" data-i18n="physics.completionTitle">本轮分流完成</p>
+        <button class="capacity-continue" id="physics-results-button" type="button" data-i18n="physics.viewResults" disabled>查看结果</button>
+      </section>
+
       <section class="ending-screen" id="ending-screen" hidden tabindex="-1" aria-labelledby="ending-title">
         <div class="ending-content">
           <header class="ending-header">
@@ -108,10 +113,12 @@
             <div class="language-switch" data-language-switch role="group" data-i18n-aria-label="language.label" aria-label="界面语言"></div>
           </header>
           <div class="ending-copy">
-            <h1 id="ending-title" data-i18n="ending.title">屏幕终于清空了。</h1>
-            <p data-i18n="ending.lineTwo">但那些生命，并没有因此消失。</p>
-            <p data-i18n="ending.lineThree">当繁育不断继续，</p>
-            <p data-i18n="ending.lineFour">没有被市场选择的生命，最终去了哪里？</p>
+            <h1 id="ending-title" data-i18n="ending.title">看不见的滞销动物，去了哪里？</h1>
+            <p data-i18n="ending.lead">屏幕终于清空了。这一次，让动物离开的不是领养，而是象征死亡的消散。</p>
+            <p data-i18n="ending.market">为满足人的养宠欲望，商家不断繁育。当购买力缩减，繁育却没有停止，猫、狗、金鱼……就成了卖不出去的生命。</p>
+            <p data-i18n="ending.fates">它们可能无家可归、走向死亡、被当作商品处理，或继续被用于繁育。</p>
+            <p data-i18n="ending.lever">你轻轻拉下杠杆，生命便开始滚动。在一次次碰撞与分流之间，它们被推向不同的去处。从诞生到终局，命运似乎始终握在他人手中。</p>
+            <p data-i18n="ending.callToAction">清空屏幕，不等于解决问题。停止过度繁育，别让生命成为滞销的库存。</p>
           </div>
           <section class="ending-results" aria-labelledby="result-title">
             <h2 id="result-title" data-i18n="ending.resultTitle">本轮模拟结果</h2>
@@ -122,7 +129,7 @@
             <p class="ending-note" data-i18n="ending.metaphor">骷髅转化为视觉隐喻；“继续繁育”不等同于死亡。</p>
             <div class="ending-context" data-i18n-aria-label="ending.contextLabel" aria-label="关于模拟数据的说明">
               <p data-i18n="ending.contextOne">我无法为这些去向给出确切的发生概率。本作品未采用能够覆盖各类宠物、持续追踪未被领养个体去向的可靠数据，因此，这里的数字只是创作模拟，不代表现实中的比例。</p>
-              <p data-i18n="ending.contextTwo">猫、狗、兔子、仓鼠、鸟和金鱼……当它们没有被领养，我仍想追问：后来发生了什么？让人心痛的，不只是它们离开了屏幕，而是它们的去向，可能始终没有进入我们的视线。</p>
+              <p data-i18n="ending.contextTwo">每一个符号背后，都应是一条需要被照护的生命。</p>
             </div>
           </section>
           <p class="ending-note" id="ending-error" role="alert" data-i18n="ending.error" hidden>结尾动画未能完整播放。已保留本轮模拟结果，你可以重新开始。</p>
