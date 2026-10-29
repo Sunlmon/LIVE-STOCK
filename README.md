@@ -2,10 +2,13 @@
 
 一件关于宠物过量繁育、有限领养能力与未被选择的生命去向的叙事性互动网页。它先请玩家完成一个简单任务——清空屏幕，再让“清空”从领养行为逐渐转变为机械分流，最后追问：离开画面的生命，后来去了哪里？
 
-- [在线体验](https://sunlmon.github.io/publish/)（线上内容取决于最近一次 GitHub Pages 部署）
-- [源代码仓库](https://github.com/Sunlmon/publish)
-- [开发过程、用户试玩与 AI 使用说明](PROCESS.md)
+- [在线体验](https://sunlmon.github.io/LIVE-STOCK/)（仓库改名后的 Pages 地址；线上内容取决于实际部署，本次更新不代表已经发布）
+- [源代码仓库](https://github.com/Sunlmon/LIVE-STOCK)
+- [开发过程与用户试玩](PROCESS.md)
+- [AI 使用说明](AI_USAGE.md)
 - [素材与技术引用](CREDITS.md)
+
+文档核对日期：2026-10-29。当前“本轮分流完成”页固定停留，点击“查看结果”继续；旧版八秒自动跳转已经取消。目录中的过程记录文件为 `PROCESS.md`，不是 `PROGRESS.md`。
 
 ## 给谁使用
 
@@ -41,12 +44,12 @@
 Windows：在项目根目录打开 PowerShell，执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\serve.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\serve.ps1
 ```
 
 打开 <http://localhost:8000/>，按 START。保持终端运行，结束时按 `Ctrl+C`。该命令只为本次服务器进程设置执行策略，不要求永久降低系统策略。若提示脚本不存在，请确认终端位于包含 `serve.ps1` 的目录；若端口被占用，先检查是否已启动本项目服务器，不要重复启动。
 
-其他系统：使用能将 `.js` 作为 JavaScript 提供的静态 HTTP 服务器，以本项目根目录为网站根目录。不要通过 `file://` 双击打开；浏览器需要通过 HTTP 加载 ES 模块。
+其他系统：使用能将 `.js` 作为 JavaScript 提供的静态 HTTP 服务器，以本项目根目录为网站根目录。例如已安装 Python 3 时，可运行 `python3 -m http.server 8000`，再打开同一网址；Python 只是可选的服务方式，不是游戏依赖。不要通过 `file://` 双击打开；浏览器需要通过 HTTP 加载 ES 模块。
 
 可选开发入口（不代替完整流程）：
 
@@ -88,7 +91,15 @@ powershell -ExecutionPolicy Bypass -File .\serve.ps1
 node --test tests/*.test.mjs
 ```
 
-实际验证范围、复测步骤与限制见 [tests/TESTING.md](tests/TESTING.md)。真人试玩反馈和自动检查分开记录，不把脚本运行当作用户测试。
+2026-10-29 重新运行：**72 项通过，0 失败**。此前 Chrome 检查覆盖真实发射、返回重发、出口处理、等待 20 秒不自动继续、鼠标与 Enter 查看结果、双语、四种窗口与原结尾重开；实际验证范围、复测步骤与限制见 [tests/TESTING.md](tests/TESTING.md)。本次文档整理没有重新进行浏览器全流程或真人试玩，不能把旧记录写成新的验证。
+
+## AI 使用与创作责任
+
+ChatGPT / Codex 对方案讨论、SVG、较大范围的代码实现与调试、双语文字、自动检查和文档整理有实质参与，不只是拼写检查。主题、视觉参考选择、核心故事及最终修订方向由作者提供与确认。
+
+作者在 AI 推荐的 B 版动物方向上采用五种 B、鹦鹉 A 的混选；多次要求修正突兀或卡住的繁殖动画，并将完成页改为手动查看结果。这些选择与实际试玩反馈见 [PROCESS.md](PROCESS.md)，工具用途、保留与修改的建议、贡献边界见 [AI_USAGE.md](AI_USAGE.md)。
+
+游戏运行时没有 AI 服务，不需要 AI 账户或密钥，也不向 AI 发送玩家输入。自动化检查不是真人试玩；图形由代码重画也不替代素材许可。具体模型版本、调用时间与 AI 贡献比例未完整记录，不作补造。
 
 ## 已知限制
 
@@ -101,4 +112,4 @@ node --test tests/*.test.mjs
 
 ## 提交与分享
 
-将源代码、必要素材、README、PROCESS 与 Credits 保存在个人公开仓库，保留真实的开发提交历史。在 Canvas 提交**仓库链接**；在线试玩地址供老师与观众体验，但不能替代仓库提交。发布更新需要自行 commit、push 并等待 GitHub Pages 部署；本轮本地修改不会自动更新线上版本。
+将源代码、必要素材、README、PROCESS、AI 使用说明与 Credits 保存在个人公开仓库，保留真实的开发提交历史。在 Canvas 提交**仓库链接**；在线试玩地址供老师与观众体验，但不能替代仓库提交。发布更新需要自行 commit、push 并等待 GitHub Pages 部署；本轮本地修改不会自动更新线上版本。本地远程地址已经指向 `Sunlmon/LIVE-STOCK.git`；本轮网络读取未能确认线上与本地同步，不据此声称部署已更新。
