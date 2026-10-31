@@ -1,227 +1,239 @@
-# LIVE STOCK / 活体滞销
+# LIVE STOCK
 
-## 项目总说明与 Codex 开发指南
+## Project brief and Codex development guide
 
-**用途：** 将本文件放入 VS Code 项目根目录，让 Codex 先理解作品，再按
-WIP（Work in Progress，阶段性原型）逐步开发。\
-**开发原则：** 一次只做一个阶段；先验证核心互动，再做视觉精修；不要求
-Codex 一次生成完整作品。
+**Document status:** This is the original planning brief, translated into English on 31 October 2026. It preserves early requirements, including ideas and parameters subsequently revised or omitted. Refer to [README.md](README.md) for current behaviour and [PROCESS.md](PROCESS.md) for actual decisions and changes. The WIP instructions below document the original development plan; they do not restart development or override later approved requirements.
 
-------------------------------------------------------------------------
+**Purpose:** Place this file in the VS Code project root so Codex can understand the work before developing it through successive WIP (Work in Progress) prototypes.
 
-# 1. 项目是什么？
+**Development principles:** Work on one stage at a time. Validate the core interaction before refining the visuals. Do not ask Codex to generate the entire work in one pass.
 
-## 1.1 项目名称
+---
 
-**活体滞销 / LIVE STOCK**
+# 1. What is the project?
 
-## 1.2 核心概念
+## 1.1 Project name
 
-这是一件关于宠物过量繁育、领养能力有限，以及未被市场选择的动物可能面临何种命运的叙事性互动网页。
+**LIVE STOCK**
 
-用户首先接到一个简单任务------**"清空屏幕"**。一开始，用户可以轻松点击小动物，将它们"领养"走；但小动物不断繁殖，数量逐渐超过用户的处理速度，最终填满画面。
+## 1.2 Core concept
 
-屏幕饱和后，作品直接切换到一个弹珠式分流装置。用户通过拉杆启动物理装置，四只动物在真实的二维物理模拟中碰撞、反弹并进入四个抽象出口。出口在这个阶段不显示具体结局名称。
+This is a narrative interactive website about excessive pet breeding, limited adoption capacity, and the possible fates of animals not chosen by the market.
 
-最后，画面重新呈现满屏动物。动物停止运动、逐渐褪色，转化为对应的出口图标，再转化为骷髅头并逐一消散。最终页面揭示四种可能去向，并提出一个开放式问题。
+The user first receives a simple task: **clear the screen**. Initially, clicking small animals to "adopt" them is easy. However, they continue breeding until their numbers exceed the user's capacity to respond and eventually fill the screen.
 
-作品不应在开头直接说教，也不应展示血腥伤害过程。它希望用户先参与、再发现、最后重新思考。
+Once the screen is saturated, the work moves directly to a pinball-style sorting apparatus. The user operates a lever to activate the physical mechanism. Four animals collide and rebound in a real two-dimensional physics simulation before entering four abstract outlets. Specific outcome names are not shown at this stage.
 
-## 1.3 核心问题
+Finally, the screen fills with animals again. They stop moving, gradually fade, turn into their corresponding outlet symbols, then become skulls and disappear one by one. The final page reveals four possible destinations and poses an open question.
 
-当繁育不断继续，而领养能力和市场需求有限时，没有被市场选择的生命最终去了哪里？
+The work should neither lecture the user at the beginning nor depict graphic harm. It invites participation first, discovery next, and reflection afterward.
 
-## 1.4 作品类型
+## 1.3 Central question
 
--   单页互动网页 / creative coding artwork
--   桌面端优先，支持不同浏览器窗口尺寸
--   HTML、CSS、JavaScript、Canvas API 与 Matter.js
--   不需要后端、付费 API 或在线 AI 服务
+When breeding continues but adoption capacity and market demand are limited, where do the lives not chosen by the market eventually go?
 
-------------------------------------------------------------------------
+## 1.4 Format
 
-# 2. 用户体验流程
+- A single-page interactive website / creative coding artwork.
+- Desktop-first, supporting different browser window sizes.
+- HTML, CSS, JavaScript, Canvas API and Matter.js.
+- No backend, paid API or online AI service required.
 
-## 阶段 0：开场------"清空屏幕"
+---
 
--   初始画面简洁，显示大字：**清空屏幕**
--   提供清晰的开始按钮。
--   用户点击开始后进入互动场景。
--   不要在开场用大段文字解释主题。
+# 2. User experience
 
-## 阶段 1：清空屏幕------繁殖与领养
+## Stage 0: opening — Clear the screen
 
-### 六种小动物
+- Keep the opening simple, with a large **Clear the screen** title.
+- Provide a clear start button.
+- Enter the interactive scene when the user selects it.
+- Do not explain the theme through a long opening passage.
 
-1.  猫
-2.  狗
-3.  兔子
-4.  仓鼠
-5.  鸟
-6.  金鱼
+## Stage 1: clear the screen — reproduction and adoption
 
-### 动物视觉
+### Six animals
 
--   不需要由用户手工绘制。
--   使用代码生成或编写可复用的 SVG 矢量图形。
--   猫、狗、兔子、仓鼠和鸟以简化头部剪影为主。
--   金鱼使用完整侧身轮廓，包括身体、尾巴和鱼鳍。
--   每种动物都放在相同尺寸的圆形外框中。
--   六种动物的外框、视觉重心和线条风格尽量统一，但必须通过轮廓而非仅靠颜色区分物种。
--   避免用 emoji 代替正式图形。
--   动物图形需要缩小后仍可辨认。
+1. Cat
+2. Dog
+3. Rabbit
+4. Hamster
+5. Bird
+6. Goldfish
 
-### 尺寸与画布
+### Animal graphics
 
--   以 **1920 × 1080** 作为逻辑设计画布，浏览器窗口变化时按比例适配。
--   第一阶段动物外圆直径先从 **24--28 个逻辑像素**测试。
--   动物应当小而多；视觉冲击来自数量、密度、重叠与持续繁殖，而不是单只动物过大。
--   窗口缩放后，绘制位置和点击判定必须保持一致。
+- The user does not need to draw the animals manually.
+- Generate or author reusable SVG vector graphics in code.
+- Use simplified head silhouettes for cats, dogs, rabbits, hamsters and birds.
+- Show goldfish in a complete side profile, including body, tail and fins.
+- Place each species inside an equally sized circular frame.
+- Keep frames, visual centres and line styles consistent, while distinguishing species through silhouette rather than colour alone.
+- Do not use emoji as production graphics.
+- Graphics must remain recognisable at small sizes.
 
-### 繁殖机制
+### Size and canvas
 
--   成年动物通过轻微弹跳、压缩、释放动画，生成 **4--6 只同种幼崽**。
--   幼崽经过一段时间长大，之后才可以继续繁殖。
--   繁殖间隔、成长时间、幼崽数量、动物上限和饱和阈值应集中放在配置中，便于调整。
--   动物持续繁殖，用户通过点击尝试清空屏幕。
--   设置合理的总量上限和性能保护，避免无限生成导致网页卡死。
--   达到画面饱和条件时直接进入阶段 2，不出现额外的说明弹窗。
+- Use **1920 × 1080** as the logical design canvas and fit it proportionally to the browser window.
+- Initially test stage-one outer-circle diameters of **24–28 logical pixels**.
+- Animals should be small and numerous. The impact should come from quantity, density, overlap and continuing reproduction, rather than oversized individuals.
+- Keep rendering and click detection aligned after resizing.
 
-### 点击领养
+### Reproduction
 
--   点击动物后，该动物从活动动物和繁殖逻辑中移除。
--   播放简短消失动画：动物分裂成数个小黑圆点，向外散开并淡出。
--   领养计数增加，每只动物只能计数一次。
--   可以播放对应动物的短叫声；音频加载失败时，视觉互动仍然正常。
--   提供静音开关。
--   声音素材来源与许可必须记录在 `CREDITS.md`。
--   已领养动物不进入后续结局统计。
+- An adult produces **four to six same-species offspring** through a slight bounce, compression and release animation.
+- Offspring grow for a period before becoming eligible to reproduce.
+- Centralise breeding intervals, growth duration, litter size, population limits and saturation thresholds in configuration.
+- Animals reproduce continuously as the user clicks to clear them.
+- Set reasonable population and performance safeguards to prevent unlimited generation from freezing the page.
+- Move directly to stage two on saturation, without an additional explanatory dialog.
 
-### Canvas 的作用
+### Click to adopt
 
-第一阶段建议用 Canvas API
-绘制大量动物和粒子，而不是给每只动物都创建一个独立 HTML 元素。
+- Clicking removes an animal from the active population and breeding logic.
+- Play a brief disappearance animation: several small black dots scatter outward and fade.
+- Increase the adoption count once per animal.
+- A short species-specific sound may play; visual interaction must remain functional if audio fails to load.
+- Provide a mute control.
+- Record sound sources and licences in `CREDITS.md`.
+- Exclude adopted animals from subsequent outcome statistics.
 
-Canvas
-是一张由代码持续绘制的画布，不会自动提供繁殖、点击或物理功能。程序仍需负责： -
-动物状态与位置； - 每帧绘制； - 点击命中检测； - 繁殖与成长； -
-领养和粒子消散； - 画面密度与饱和判断。
+### The role of Canvas
 
-必须实际测试性能和点击准确性，不要仅凭理论估计能容纳多少动物。
+Use Canvas API to draw many animals and particles rather than creating a separate HTML element for each animal.
 
-## 阶段 2：四只动物的真实物理弹珠体验
+Canvas is a surface continuously drawn by code; it does not automatically provide reproduction, clicking or physics. The program must still manage:
 
-**这里只需要四只动物进入弹珠装置，不要把第一阶段所有动物都放进物理引擎。**
+- Animal state and position.
+- Drawing every frame.
+- Click hit detection.
+- Reproduction and growth.
+- Adoption and particle disappearance.
+- Density and saturation detection.
 
-### 物理与操作
+Actually test performance and hit accuracy instead of estimating capacity from theory alone.
 
--   使用 **Matter.js** 实现真实二维物理。
--   必须有重力、圆形刚体、碰撞、反弹、静态挡板和四个底部出口。
--   右下角有可拖动的机械拉杆，用户拖动并释放后启动分流。
--   四只动物可以按合理间隔进入装置，让用户看清运动过程。
--   第二阶段动物直径先从 **28--36
-    个逻辑像素**测试，比第一阶段略大，但不要大到让装置显得空。
--   动物的视觉仍然是圆形外框与动物图形；它们的位置和运动必须与 Matter.js
-    中的真实刚体同步。
--   不使用预设轨迹冒充真实物理。
+## Stage 2: real physical pinball with four animals
 
-### 四个抽象出口
+**Only four animals need to enter the apparatus. Do not put the entire stage-one population into the physics engine.**
 
-物理阶段不显示结局文字，只显示抽象图标： 1. 断续路径 2. 断裂圆环 3.
-商品标签或条形码 4. 循环箭头
+### Physics and controls
 
-### 真实物理规则
+- Use **Matter.js** for real two-dimensional physics.
+- Include gravity, circular rigid bodies, collisions, rebounds, static baffles and four bottom outlets.
+- Place a draggable mechanical lever at the lower right. Pulling and releasing it activates sorting.
+- Animals may enter at reasonable intervals so their motion remains readable.
+- Initially test stage-two animal diameters of **28–36 logical pixels**: slightly larger than stage one, but not so large that the apparatus looks empty.
+- Keep the circular frame and animal drawing. Their positions and movement must stay synchronised with the actual Matter.js bodies.
+- Do not present predetermined paths as real physics.
 
--   动物最终进入哪个出口，必须由实际的物理运动和出口检测决定。
--   不能在动物进入装置前就给它指定出口。
--   每轮可以变化初始位置、初始速度等合理参数，让不同轮次有机会产生不同结果。
--   不保证每轮四个出口都有动物进入；不能为了凑齐四种结果而强行改写碰撞结果。
--   每只动物进入出口后只记录一次，再安全移除对应刚体。
--   物理阶段出错时，应有可理解的提示和重试方式。
+### Four abstract outlets
 
-## 阶段 3：最终揭示动画
+Show symbols only during the physical stage, without outcome labels:
 
-四只物理动物完成分流体验后，进入结尾动画：
+1. A discontinuous path.
+2. A broken ring.
+3. A merchandise tag or barcode.
+4. Circular arrows.
 
-1.  短暂重现第一阶段动物占满屏幕的画面。
-2.  所有动物停止运动。
-3.  动物逐渐褪色，但保留物种与个体轮廓差异。
-4.  每只动物转化为它对应的出口图标。
-5.  图标继续转化为骷髅头。
-6.  骷髅头逐一消散，最终离开画面。
+### Physical rules
 
-### 重要限制
+- Actual motion and outlet detection must determine the outlet entered.
+- Do not assign an exit before an animal enters the apparatus.
+- Reasonable initial parameters, such as position and velocity, may vary between rounds to permit different results.
+- A round need not populate every outlet. Do not rewrite collision results to force all four categories to appear.
+- Record each animal only once after entry, then safely remove its rigid body.
+- Provide understandable error feedback and a retry action if physics fails.
 
--   不把动物变成编号或纯数据点。
--   不需要把所有动物聚集成四组。
--   不展示血腥伤害过程。
--   重点是保留个体生命的视觉差异，再通过转化与消散形成情绪转折。
+## Stage 3: final reveal animation
 
-### 两类结局数据必须分开
+After the four physical animals finish sorting:
 
-由于只有四只动物真正经过物理装置，不能假称第一阶段全部动物都经过了真实物理模拟。
+1. Briefly recreate the full-screen stage-one population.
+2. Stop all animal movement.
+3. Gradually fade the animals while retaining differences in species and individual silhouettes.
+4. Transform each animal into its corresponding outlet symbol.
+5. Transform the symbols into skulls.
+6. Make the skulls disappear individually until they leave the screen.
 
-请分开管理： - `physicalOutcomes`：四只物理动物实际进入的出口。 -
-`simulatedFates`：最终整屏动物的模拟结局分配。
+### Important constraints
 
-最终整屏动物的结局由单独的模拟分配逻辑生成；每轮可以不同，参数需要可调整。在找到可靠研究资料前，这些权重只是创作模拟参数，不是现实世界发生率。最终页面必须标注
-**"本轮模拟结果"**。
+- Do not replace animals with numbers or anonymous data points.
+- There is no need to gather them into four groups.
+- Do not depict graphic harm.
+- Preserve visual differences between individual lives, then create an emotional shift through transformation and disappearance.
 
-## 阶段 4：最终结算
+### Keep two outcome datasets separate
 
-结算时才揭示四种去向：
+Only four animals actually pass through the physical apparatus. Do not imply that the entire stage-one population received real physical simulation.
 
-1.  **流浪**：包括饥饿、无主和缺乏照护等处境。
-2.  **意外死亡**：例如道路交通事故。
-3.  **商品化处理**：例如肉用、皮草等用途。
-4.  **继续繁育**：作为种公或种母继续参与繁殖。
+Manage these separately:
 
-要求： - 显示每类模拟数量和比例。 - 总数、百分比与动物结局必须一致。 -
-不把"继续繁育"称为死亡。 - 不把模拟结果冒充现实统计数据。 -
-提供重新开始按钮。 -
-重新开始时清除上一轮动物、粒子、定时器、物理对象、出口记录、模拟结局与统计状态。
+- `physicalOutcomes`: the actual exits entered by the four physical animals.
+- `simulatedFates`: the simulated assignments for the final full-screen population.
 
-### 结尾文案
+A separate simulation generates the population's outcomes. They may differ between rounds, and weights should be adjustable. Until supported by reliable research, those weights are creative parameters, not real-world occurrence rates. The final page must label them **Simulated results for this round**.
 
-必须完整显示以下文案，不要擅自改写：
+## Stage 4: final results
 
-> 屏幕终于清空了。
+Reveal the four destinations only at the end:
+
+1. **Stray life:** conditions including hunger, lack of ownership and inadequate care.
+2. **Accidental death:** for example, road traffic incidents.
+3. **Commodification:** for example, use for meat or fur.
+4. **Continued breeding:** use as breeding males or females.
+
+Requirements:
+
+- Show simulated counts and proportions for each category.
+- Keep totals, percentages and individual assignments consistent.
+- Do not describe continued breeding as death.
+- Do not pass simulated results off as real statistics.
+- Provide a restart button.
+- Restart must clear animals, particles, timers, physics bodies, outlet records, simulated assignments and statistical state from the previous round.
+
+### Original ending text
+
+The original brief requested the following complete ending without unauthorised rewriting:
+
+> The screen is finally clear.
 >
-> 但那些生命，并没有因此消失。
+> But those lives have not simply disappeared.
 >
-> 当繁育不断继续，
+> As breeding continues,
 >
-> 没有被市场选择的生命，最终去了哪里？
+> where do the lives not chosen by the market eventually go?
 
-------------------------------------------------------------------------
+---
 
-# 3. 视觉风格
+# 3. Visual language
 
--   极简、克制、具有概念艺术气质。
--   暖白：`#F1EFE8`
--   工业炭黑：`#282A27`
--   灰色：`#BDBDB4`
--   警示琥珀：`#D6A34F`
--   暗红：`#B84940`
+- Minimal, restrained and conceptual.
+- Warm white: `#F1EFE8`.
+- Industrial charcoal: `#282A27`.
+- Grey: `#BDBDB4`.
+- Warning amber: `#D6A34F`.
+- Dark red: `#B84940`.
 
-视觉要求： - 动物图形简洁、统一，适合大量重复绘制。 -
-第一阶段的弹跳有一点生命力，但不要幼儿化。 -
-动物数量增加后，空间逐渐拥挤、压迫。 -
-第二阶段像真实机械分流装置，不要像鲜艳的卡通街机游戏。 -
-出口在物理阶段只显示抽象图标。 -
-结尾通过褪色、图标转化、骷髅消散和文字揭示形成反差。 -
-不添加无关菜单、过多装饰或冗长教程。
+Visual requirements:
 
-------------------------------------------------------------------------
+- Simple, consistent animal graphics suitable for repeated drawing.
+- Slightly lively stage-one bouncing, without an infantile style.
+- Increasing crowding and pressure as the population grows.
+- A stage-two machine that resembles a real mechanical sorter rather than a colourful cartoon arcade.
+- Abstract outlet symbols only during the physical stage.
+- Contrast through fading, symbol transformation, skull disappearance and written revelation.
+- No unrelated menus, excessive decoration or lengthy tutorial.
 
-# 4. 技术要求与推荐文件结构
+---
 
-推荐使用 HTML、CSS、JavaScript、Canvas
-API、Matter.js。若项目已经有技术栈，先检查现状再决定是否调整。
+# 4. Technical requirements and suggested structure
 
-参考文件结构：
+HTML, CSS, JavaScript, Canvas API and Matter.js are recommended. If the project already has a stack, inspect it before deciding whether to change it.
 
-``` text
+Suggested structure:
+
+```text
 live-stock/
 ├── index.html
 ├── package.json
@@ -246,113 +258,148 @@ live-stock/
 └── screenshots/
 ```
 
-文件可以根据现有项目适当合并，不要为了符合列表而过度拆分，也不要把全部逻辑堆在一个巨大文件中。
+Combine files where appropriate for the existing project. Do not split unnecessarily just to match this list, or put all logic into one enormous file.
 
-### 必须处理的边界情况
+### Required edge-case handling
 
--   快速重复点击不能重复领养计数。
--   浏览器缩放后，绘制和点击位置一致。
--   达到动物上限后不再无限生成或卡死。
--   音频失败或自动播放受限时，视觉互动仍可用。
--   阶段切换时停止上一阶段的定时器和输入事件。
--   每只物理动物只能进入一个出口、只统计一次。
--   某个出口结果为 0 时，结算仍能正常显示。
--   重新开始不残留上一轮状态。
--   窗口尺寸变化后 Canvas 和物理场景不应错位。
--   物理阶段出错时提供清晰提示和重试方式。
+- Rapid repeated clicks must not count the same adoption twice.
+- Rendering and click positions must remain aligned after browser resizing.
+- Reaching the population cap must not cause unlimited generation or freezing.
+- Visual interaction must work if audio fails or autoplay is restricted.
+- Stop previous-stage timers and input handlers when changing stages.
+- Each physical animal may enter and count toward only one outlet.
+- Results must display correctly when a category has zero animals.
+- Restart must not retain previous-round state.
+- Canvas and physics must not become misaligned when the window changes size.
+- Provide clear feedback and retry when the physical stage fails.
 
-------------------------------------------------------------------------
+---
 
-# 5. Codex 分阶段开发计划（WIP）
+# 5. Phased Codex development plan
 
-## WIP 0：检查项目与制定计划
+## WIP 0: inspect and plan
 
-先检查项目目录和已有代码，说明： 1.
-当前项目使用什么技术、有哪些现成文件； 2. 建议的实现方案和文件结构； 3.
-Canvas 与 Matter.js 如何配合； 4. 第一阶段如何保持动物数量多但性能可控；
-5. 四只物理动物与整屏模拟结局如何分开； 6. 主要风险和测试方法。
+Inspect the project directory and existing code first, then explain:
 
-**本阶段不要编写全部代码，不要覆盖任何现有文件。**
+1. Its current technologies and available files.
+2. The recommended implementation and file structure.
+3. How Canvas and Matter.js work together.
+4. How stage one supports many animals with controlled performance.
+5. How to separate four physical records from the full-population simulation.
+6. Main risks and testing methods.
 
-## WIP 1：第一阶段视觉原型
+**At this stage, do not write the complete implementation or overwrite existing files.**
 
-只做： - 开场"清空屏幕"； - 六种小动物的 SVG 视觉； - Canvas
-绘制与缩放； - 繁殖与成长； - 点击后粒子消散； - 领养计数； -
-动物密度增加； - 饱和时切换到一个临时的第二阶段占位画面。
+## WIP 1: stage-one visual prototype
 
-暂时不做
-Matter.js、最终统计或骷髅动画。完成后先让我检查动物大小、辨识度、密度、风格和繁殖速度。
+Implement only:
 
-## WIP 2：独立物理原型
+- The Clear the screen opening.
+- SVG visuals for six animals.
+- Canvas drawing and resizing.
+- Reproduction and growth.
+- Click-triggered particle disappearance.
+- Adoption count.
+- Increasing density.
+- A temporary stage-two placeholder on saturation.
 
-单独制作四只动物的 Matter.js 场景： - 重力、碰撞、反弹和挡板； -
-四个抽象出口； - 右下角可拖动拉杆； - 真实出口检测； -
-每只动物只统计一次； - 重新开始。
+Do not implement Matter.js, final statistics or skull animation yet. After completion, let the author review animal size, recognition, density, style and reproduction speed.
 
-重点验证物理行为，不急着整合第一阶段。
+## WIP 2: separate physics prototype
 
-## WIP 3：阶段整合与结尾
+Build a Matter.js scene with four animals:
 
--   连接 WIP 1 与 WIP 2；
--   处理饱和后的阶段切换；
--   保留四只动物的真实物理结果；
--   为整屏动物生成独立的模拟结局；
--   实现褪色、图标转化、骷髅消散；
--   显示模拟统计与指定结尾文案；
--   完成重置逻辑。
+- Gravity, collisions, rebounds and baffles.
+- Four abstract outlets.
+- A draggable lower-right lever.
+- Actual outlet detection.
+- One record per animal.
+- Restart.
 
-## WIP 4：测试与交付
+Prioritise validating physics rather than immediately integrating stage one.
 
--   测试点击、缩放、繁殖、音频失败、物理出口与重新开始；
--   至少找一位其他人，在不提前解释玩法的情况下试玩；
--   记录观察并改善至少一处；
--   完成 README.md、PROCESS.md、CREDITS.md；
--   准备截图或短录屏；
--   持续进行 Git commit；
--   发布公开 GitHub 仓库。
+## WIP 3: stage integration and ending
 
-------------------------------------------------------------------------
+- Connect WIP 1 and WIP 2.
+- Handle the transition after saturation.
+- Preserve the four actual physical outcomes.
+- Generate independent simulated outcomes for the full-screen population.
+- Implement fading, symbol transformation and skull disappearance.
+- Display simulated statistics and the specified ending text.
+- Complete reset logic.
 
-# 6. Assignment 3 的交付文件
+## WIP 4: testing and delivery
+
+- Test clicking, resizing, breeding, audio failure, physical exits and restart.
+- Ask at least one other person to try before explaining the interaction.
+- Record observations and improve at least one aspect.
+- Complete README.md, PROCESS.md and CREDITS.md.
+- Prepare screenshots or a short screen recording.
+- Commit throughout development.
+- Publish a public GitHub repository.
+
+---
+
+# 6. Assignment 3 deliverables
 
 ## README.md
 
-至少包含： - 作品概念； - 目标用户； - 主要互动； - 本地运行步骤； -
-已知限制； - 至少一张截图； - 如有，线上体验链接和短录屏。
+Include at least:
+
+- The concept.
+- Intended audience.
+- Main interaction.
+- Local run instructions.
+- Known limitations.
+- At least one screenshot.
+- A live link and short recording if available.
 
 ## PROCESS.md
 
-记录真实的开发过程： - 最初的想法； - 实际完成的一项设计或代码修改； -
-用户试玩时观察到什么； - 根据观察作出的决定； - 使用了哪些 AI
-工具以及用途； - 一条实际保留的 AI 建议； - 一条实际修改或拒绝的 AI
-建议及原因。
+Record the actual development process:
 
-AI 使用记录必须符合真实过程，不要虚构测试、试玩或设计决定。
+- The starting idea.
+- An implemented design or code change.
+- Observations from a user trial.
+- Decisions made in response.
+- AI tools used and their purposes.
+- One AI suggestion actually retained.
+- One AI suggestion actually changed or rejected, with the reason.
+
+AI disclosure must reflect the real process. Do not invent tests, trials or design decisions.
 
 ## CREDITS.md
 
-记录： - 开源库； - 借用的代码； - SVG、图片、声音等外部素材； -
-来源与许可。
+Record:
 
-此外： - 至少处理一种常见错误或中断； - 至少完成一位其他人的试玩； -
-保留逐步开发的 Git 历史； - 提供可访问的公开 GitHub 仓库； - 不上传 API
-key、隐私信息或未经许可的素材。
+- Open-source libraries.
+- Borrowed code.
+- External SVGs, images, sounds and other assets.
+- Sources and licences.
 
-------------------------------------------------------------------------
+Also:
 
-# 7. 给 Codex 的第一条指令：现在只做 WIP 0
+- Handle at least one ordinary mistake or interruption.
+- Complete at least one trial with another person.
+- Preserve an incremental Git history.
+- Provide an accessible public GitHub repository.
+- Do not upload API keys, private information or material without permission.
 
-请完整阅读项目根目录中的
-`LIVE_STOCK_PROJECT_BRIEF.md`，理解这件作品的目标、互动流程、视觉要求、技术约束和作业交付要求。
+---
 
-现在只执行 WIP 0：检查当前项目目录，理解已有代码，制定实现计划。
+# 7. Original first instruction to Codex: WIP 0 only
 
-请重点分析： 1. Canvas 如何绘制大量六种小动物； 2.
-如何控制繁殖、成长、点击粒子消散和屏幕饱和； 3. 如何用 Matter.js
-实现四只动物的真实物理分流； 4.
-如何区分四只物理动物的真实出口记录与整屏动物的模拟结局； 5.
-推荐的文件结构、开发顺序和测试方式； 6. WIP 1
-的最小可运行版本具体包含什么。
+Read `LIVE_STOCK_PROJECT_BRIEF.md` in the project root completely. Understand the work's goals, interaction flow, visual requirements, technical constraints and assignment deliverables.
 
-本轮只输出计划与风险分析。**不要编写代码，不要修改或覆盖任何文件。**
-等我确认计划后，再开始 WIP 1。
+Execute WIP 0 only: inspect the current directory, understand existing code and prepare an implementation plan.
+
+Focus on:
+
+1. Drawing large numbers of six animal types using Canvas.
+2. Managing breeding, growth, click particles and screen saturation.
+3. Using Matter.js for real sorting physics with four animals.
+4. Separating actual exits of those four animals from the full-population simulation.
+5. Recommended structure, development order and tests.
+6. The exact scope of a minimal runnable WIP 1.
+
+For that initial planning round, output the plan and risks only. **Do not write code, modify or overwrite files.** Wait for the author's approval before starting WIP 1.

@@ -1,169 +1,159 @@
-# PROCESS — 活体滞销 / LIVE STOCK
+# Process — LIVE STOCK
 
-记录整理日期：2026-10-29。本文根据作者提供的决定、试玩反馈、开发对话与当前代码，由 ChatGPT / Codex 协助整理，以作者第一人称呈现。整理日期不是试玩日期；没有补造参与者身份、原话或逐次时间记录。作者提交前仍需核对。
+Initially compiled on 29 October 2026; reviewed and translated into English on 31 October 2026. ChatGPT / Codex helped organise this first-person account from the author's decisions, reported trial feedback, development conversations and code. Compilation dates are not trial dates. Participant identities, quotations and detailed session dates have not been invented. The author remains responsible for checking this account.
 
-## 当前完成状态
+## Current state
 
-- **第一阶段**：从约 45 只动物开始，点击领养产生黑点消散；未领养动物持续繁殖，新动物从原动物中心连续向外移动。每轮结束点在 550–580 只之间采样；达到后禁用点击和新繁殖，等最后一轮动画完整结束，再停在容量说明，手动确认进入第二阶段。
-- **第二阶段**：只有四只代表动物进入 Matter.js。拉杆深度决定弹簧压缩，松手后的飞行、碰撞和出口由真实物理决定。入口保持开放，返回的同一只动物可以重发，不增加动物名额。
-- **出口处理**：整球实际越过判定线后记录一次并移除刚体；约 1.3 秒内完成入腔、转为原出口图案、开盖、掉落和复位，之后才装填下一只。盖片不参与物理碰撞，不预设出口。
-- **完成页与第三阶段**：第四只复位后机器淡出，固定显示“本轮分流完成”和“查看结果”。没有自动倒计时；点击后才进入原来的停止、褪色、结局符号、2.5 秒停留、骷髅消散及最终说明。完成页和结尾均有中英文。
-- **视觉与数据**：五种动物采用 B 版、鹦鹉 A 版；暖白、深灰线条与克制的金属材质统一。真实四球记录与整屏创作模拟分开；不把等权参数称为现实概率，也不把“继续繁育”称为死亡。
+- **Stage one:** approximately 45 initial animals. Click to adopt; black dots disperse. Unadopted animals reproduce, with offspring moving continuously out from the parent's centre. A round samples its stopping population between 550 and 580. Reaching it locks adoption and new breeding, waits for all current birth animations, then shows capacity confirmation.
+- **Stage two:** four representative animals enter Matter.js. Lever depth controls spring compression; actual gravity, collisions and rebounds determine their paths and exits. The entrance stays open, and a returning animal can be relaunched without consuming another animal.
+- **Outlet processing:** whole-ball clearance records the actual outcome once and removes the body. A separate approximately 1.3-second sequence handles arrival, transformation into the existing symbol, opening, falling and closing. The next animal loads afterward. Gate animation adds no collider and does not select an exit.
+- **Completion and reveal:** after the fourth gate resets, the machine fades out. Sorting complete and View results remain until the player confirms. The original reveal then stops and fades the population, forms outcome symbols, holds them for 2.5 seconds, and proceeds through skulls, disappearance and the ending. Both languages are supported.
+- **Visuals and data:** five B icons plus the A parrot, warm white, dark lines and restrained metal materials. Four actual physical records and the full-population creative simulation are separate. Equal weights are not real probabilities; continued breeding is not death.
 
-这些状态以当前代码为准。下面保留开发记录；旧参数、旧文案和八秒自动过渡仅说明曾经的版本，不代表当前行为。
+Current code defines the behaviour above. Historical parameters and the former eight-second transition below describe previous versions only.
 
-## 2026-10-29：整理交付文档
+## 31 October: pre-submission review
 
-本次只核对和整理 README、过程记录、AI 使用说明及引用链接，没有改变游戏。仓库的本地远程地址已指向 `Sunlmon/LIVE-STOCK.git`，文档改为新仓库及对应 Pages 地址；本次未能确认线上与本地一致，不声称部署已完成，也未执行提交或推送。
+I confirmed that at least one previous participant started independently before I explained the interaction. The feedback below still refers to the actual earlier trials. This confirmation date is not presented as a trial date or as evidence of a new participant or retest.
 
-重新运行现有 Node 测试：72 项通过、0 失败。此前真实浏览器验证见测试记录；本次未重新进行浏览器全流程或真人试玩。详细 AI 范围、保留和修改的建议单独整理到 [AI_USAGE.md](AI_USAGE.md)。
+The existing automated suite was rerun: 72 passes, no failures. All 24 relative links in the four main documents resolved locally. Anonymous checks confirmed a public repository and accessible live homepage; the online AI disclosure matched the local version before review. This pass did not repeat a complete browser playthrough or human trial, or submit to Canvas for me.
+
+The main documents were subsequently translated into English in the complete project directory. Game code and the bilingual interface were not changed by that translation.
+
+## 29 October: documentation review
+
+README, the process account, AI disclosure and credits were reviewed without changing the game. The local remote pointed to `Sunlmon/LIVE-STOCK.git`, and links were updated accordingly. At that time, online/local consistency could not be confirmed, and no commit or push was performed by the assistant.
+
+All 72 Node tests passed. Earlier browser evidence remained in the test record; this was not a new browser session or human trial. [AI_USAGE.md](AI_USAGE.md) records the scope of assistance and retained/modified suggestions.
 
 <details>
-<summary>展开 2026-10-26—2026-10-27 的迭代记录（含已经被替代的版本）</summary>
+<summary>26–27 October iteration history, including superseded versions</summary>
 
-## 2026-10-27：完成页改为手动查看结果
+### 27 October: manual View results
 
-我将“本轮分流完成”改为固定停留的页面，增加“查看结果 / View results”按钮，替代之前的 8 秒自动进入。保留机器淡出和页面淡入，完成淡入后才允许按钮操作，并支持原生键盘激活；确认有防重复保护。按钮复用现有小号灰色胶囊样式，没改出口处理、四球物理或第三阶段内容。完全淡出后的机器不再重复绘制，避免观众长时间停留时做无用渲染。
+I replaced the eight-second automatic transition with a persistent Sorting complete page and View results button. Machine fade-out and page fade-in remained; the button becomes available only afterward, accepts native keyboard activation, and rejects duplicate confirmation. It reuses the small grey capsule style. Once invisible, the machine is no longer redrawn unnecessarily. Outlet processing, four-animal physics and stage-three content were preserved.
 
-这是我提出的流程调整，不是新的真人试玩记录。AI 协助实现和自动/浏览器检查，旧八秒版保留在下面作为开发历史。
+This was my requested flow change, not new participant feedback. AI assisted implementation and automated/browser checking. The earlier timed design remains below as history.
 
-## 2026-10-27：出口处理与分流完成过渡（历史）
+### 27 October: complete outlet sequence and timed completion (historical)
 
-我希望第二阶段不是球进出口就消失，而是完整呈现机械处理：真实进入、转成该出口的既有符号、打开底部盖片、掉落、盖片复位。第四只的处理也必须播完，之后再淡出机器，显示“本轮分流完成”，完整停留 8 秒，才进入原第三阶段。
+I requested a readable sequence rather than immediate disappearance: actual entry, transformation into the existing outlet symbol, bottom gate opening, falling and reset. The fourth animal also had to finish. The original requirement then faded the machine, showed Sorting complete for eight complete seconds, and entered the existing reveal.
 
-实现保留了原有八条实际检测槽、四种出口、整球越线条件、拉杆弹簧参数和返回重发规则；只通过金属外沿、深石墨灰内壁和阴影加深出口。记录一次并移除刚体后，保存最后位置、角度、物种和已判定出口，使用独立视觉事件处理，不添加盖片碰撞体或预设飞行轨迹。约 1.3 秒的处理采用同心位移和有羽化边缘的扫掠转化，而非整张动物与图案直接交叉淡化；转化完整后才开盖和加速掉落。为让每只动物的处理可读，复位后再装填下一只，发射总数与力度不变。
+The implementation retained eight sensor lanes grouped into four categories, whole-ball clearance, spring settings and same-ball relaunch. Metal rims, graphite inner walls and shading added visual depth. Once an outcome was recorded and its body removed, a visual event stored the final pose, species and actual exit. No gate collider or predetermined flight was introduced. The approximately 1.3-second sequence used converging motion and a feathered directional transformation rather than a simple whole-image crossfade. The symbol formed before opening and accelerated downward before closing. Only then did the next animal load.
 
-完成提示使用独立状态和动画循环时钟：机器淡出 450ms、文字淡入 350ms，再显示完整 8000ms。跨越完全显现的那一帧不会挤占停留时间；隐藏页面时暂停。重开清除物理事件、完成状态和时钟，不留下异步计时器。第三阶段的揭示模块、原有结尾内容与重新开始流程没有重新设计。
+The former completion state used the animation clock: 450 milliseconds of machine fade, 350 of text fade, then 8,000 fully visible milliseconds. Hidden pages paused it; restart cleared events and clocks without independent timers. Stage three was not redesigned. This timing was later superseded by manual confirmation.
 
-AI 协助实现代码、诊断与测试；本次没有新增真人反馈。自动物理回归、真实浏览器操作和诊断传感器夹具分开记录，夹具中的定位不属于作品的真实飞行轨迹，也不用于生产中指定出口。
+AI assisted code, diagnostics and tests. Automated checks, browser actions and sensor-position fixtures were recorded separately. Diagnostic positioning did not represent natural trajectories or select production exits. No new human feedback was recorded in this pass.
 
-## 2026-10-27：确认并替换动物图标
+### 27 October: approved animal icons
 
-我先要求生成两套辨识度预览，不直接改正式素材：A 保守优化、B 特征强化，并附 48px / 28px 对照。查看后，我选择猫、狗、兔子、仓鼠和金鱼采用 B，鹦鹉采用 A。随后才将这些已确认的 SVG 路径接入正式 `SPECIES`，通过同一个定义同步更新封面、Canvas 动物与装置两侧图标。
+I requested previews before replacing production assets: conservative A and more distinctive B, with 48- and 28-pixel comparisons. I chose B for cat, dog, rabbit, hamster and goldfish, but A for the parrot. Approved SVG paths were then integrated into the shared `SPECIES` definition used by the cover, Canvas animals and side decorations.
 
-这次用尖耳和长胡须、宽口鼻垂耳、细长耳窄脸、小圆耳鼓腮、鹦鹉侧影弯喙、横向鱼身与扇尾区分物种，而不是只换表情。图形保留暖白与深灰单线风格，采用预览中确认的 4.6 单位主线宽；游戏中的圆圈直径、位置与交互没有改变。AI 协助绘制两套 SVG 和技术验证，最终混选方向由我确认。没有新增真人试玩记录。
+Pointed ears and whiskers, a broad muzzle and drooping ears, long ears with a narrow face, small ears and full cheeks, a hooked parrot profile, and a horizontal fish body with fan tail distinguish species structurally. Warm-white/dark-grey line work and the approved 4.6-unit stroke were retained; game circle sizes and behaviour were unchanged. AI helped draw and verify the SVGs; I made the mixed selection. This was not a new trial.
 
-## 2026-10-27：让结尾解释故事与拉杆隐喻
+### 27 October: story clarity and lever metaphor
 
-再次邀请他人试玩后，我感到大家对故事仍不够理解；本条只记录我本次提供的概括，不补造人数、原话或具体试玩时间。我希望说明：繁育服务于人的养宠需求，当购买力下降但繁育未停，未售出的动物便成为被市场遗留的生命；第二阶段轻轻拉动的杠杆，是人类介入其命运的隐喻。
+After further play, I felt that audiences still did not understand the story. This records my summary, not invented participant counts, quotations or dates. I wanted to connect demand for pets, breeding that continues when purchasing power falls, and lives left unchosen. The lever represents human intervention in those lives.
 
-因此将结尾标题改为“看不见的滞销动物，去了哪里？”，用五段简短文字连接屏幕清空、持续繁育、可能去向、弹珠隐喻和停止过度繁育的倡议，并同步改写英文。保留四类出口解释、真实四球记录与整屏模拟的区分、非现实概率说明，以及“继续繁育不等于死亡”的限定。将旧的数据说明尾段缩短，避免重复追问；没有改动开场、繁殖、物理、揭示动画或阶段切换。
+The ending became a question about unseen, unsold animals, followed by five short passages connecting screen clearance, ongoing breeding, possible outcomes, the lever and the case against overbreeding. English was updated too. Outcome explanations, the distinction between actual and simulated records, the data limitation and the statement that continued breeding is not death remained. Earlier repetitive text was shortened without changing gameplay or reveal timing.
 
-疑问式标题“看不见的滞销动物，去了哪里？”由我提出，AI 协助润色和组织因果顺序；不能把作者提供的标题记为 AI 原创建议。我没有把“无人统计”或“全部未售动物都死亡”写成事实，而是保留隐喻与数据限制。后来我还直接提供了当前“你轻轻拉下杠杆，生命便开始滚动……”段落，AI 将其接入双语界面。仍需再请观众体验，确认解释是否真正改善理解。
+I supplied the question title and later the current paragraph beginning with a gentle pull of the lever; AI helped organise and translate the text. They should not be attributed to AI as original ideas. The ending does not assert that nobody has ever collected relevant data or that all unsold animals die. A later human retest is still needed to establish whether this wording improves understanding.
 
-## 2026-10-26：收紧按钮与单一确认操作
+### 26 October: smaller buttons and a single confirmation
 
-我认为上一版按钮太大，因此将 START、确认和结尾重开的宽高缩为约一半（210px 宽，桌面高 54–56px），同步收敛光晕。小型语言和工具按钮也缩紧，但保留 10–11px 字号，不机械地将文字缩成难以辨认的小字。容量说明页去掉重新开始，只保留确认作为继续操作；装置中的重开及错误重试保留。没有改动繁殖、550–580 随机结束点、真实物理或结尾流程。这是作者提出的尺寸修订，并非新的真人试玩记录。
+The previous buttons felt too large. I reduced START, Confirm and ending restart to about half their previous dimensions: 210 pixels wide and 54–56 high on desktop. Glows were reduced too. Tool/language buttons became more compact while retaining readable 10–11-pixel labels. Capacity confirmation lost its restart button; apparatus restart and error retry remained. Breeding, the 550–580 range, physics and the ending were unchanged. This was my revision, not new trial feedback.
 
-## 同日上一版调整：随机结束点与高级灰胶囊按钮（历史）
+### Earlier that day: random population and grey capsules (historical)
 
-我进一步要求结束点不要固定在 550。现在每轮开始时从 550–580 中随机选择一个整数，并保留到本轮结束；它不随绘制帧、点击或语言变化重抽。达到本轮数量后仍等待最后分裂完成，再停留在确认页。按钮只显示“确认 / Confirm”，删除了下方“准备好后，点击确认继续”。
+I replaced the fixed 550 threshold with one integer sampled between 550 and 580 at round start. It stayed fixed across frames, clicks and language changes. The last births still finished before confirmation. The label became simply Confirm and the extra continuation hint was removed.
 
-按钮方向也再次修改：不再保留上一版方正实验启动键，而是按照我提供的紫色胶囊按钮截图，将材质替换为灰色渐变、暖白文字、边缘高光与柔和灰色光晕；所有页面按钮统一使用同一套胶囊材质。主要入口约 420px 宽，顶部语言、重试和重开控件按布局缩小，避免挤占装置空间。去掉原图标与箭头，不添加副标题或额外装饰，继续保留暖白背景和开场其他元素。
+I also replaced the rectangular experimental key with a grey gradient capsule, warm-white text, an edge highlight and a restrained grey glow. Buttons shared that material, with smaller tool controls. Main buttons were then approximately 420 pixels wide, before the later halving. Arrows and extra icons were removed without changing the warm-white cover. AI assisted styling, state logic and checks; this was my direction, not a new trial.
 
-这是我提出的新设计方向，不是新增真人反馈。AI 协助实现 CSS 与状态逻辑，并进行自动和浏览器检查；不能将这些检查当作真人复测。之前的设计选择与数值记录保留在下方作为历史。
+### Earlier that day: fixed 550 and an experimental key (historical)
 
-## 同日上一版调整：固定 550 与实验启动键（历史）
+I initially slowed the opening and moved the ending condition to a fixed 550 animals instead of an earlier density trigger. Base intervals shortened from 4.4 to 2.2 seconds with bounded variation. Final partial litters filled remaining places, and queued sources were not stopped prematurely while the player adopted animals. Capacity still limited actual births.
 
-第一轮调整后，我仍觉得开局太快，因此进一步将结束点明确为屏幕中 550 只，而不是原先较早触发的密度阈值。繁殖基础间隔从 4.4 秒逐步缩短至 2.2 秒，保留有界变化、完整分裂与点击锁。为避免卡在上限前，最后不足一窝时只补足剩余位置；接近上限不再过早减少排程来源，但实际生成量始终按当前容量限制。
-
-我同时将过量说明改为手动确认，给观众决定何时继续的时间，不再在 4.4 秒后自动进入机械装置。这是我在开发中提出的修订，不冒充新的真人试玩结论。
-
-开场 START 提出过机械启闭键、校准窗口和接触触发片三个方向，最终采用与工业装置一致的“断环触点”启动键：去掉箭头、保留直角，增强留白、内框与轻微厚度；hover 只轻微变色，按下短距离下沉。未改动物图形、物理碰撞、发射力度或结局分配。
-
-这段参数和按钮方向属于早期历史，当前行为以本文文首、README 与测试文档最前面的记录为准。最新版本仍需真人复测。
+I changed the capacity page from a 4.4-second automatic advance to explicit confirmation. Three START directions were considered: a mechanical switch, a calibration window and a contact plate. The selected earlier design used a broken-ring contact motif, square frame, inner border and shallow thickness, with restrained hover/press movement. Physics, animal graphics and outcome assignment were unchanged. Both the fixed threshold and this button design were subsequently replaced.
 
 </details>
 
-## 1. 出发点
+## 1. Starting idea
 
-我想做的不是宠物经营游戏，而是一件让观众先操作、再发现、最后反思的互动作品。开头“清空屏幕”看起来是一个可以通过不断点击完成的任务；繁育持续增长后，个人领养能力逐渐不足。第二阶段将生命变成通过机械装置分流的弹珠，第三阶段才揭示符号背后的去向。
+I wanted an experience that audiences operate first, discover through, and reflect on afterward, rather than a pet-management game. Clear the screen initially appears achievable through clicking. Continuing breeding eventually exceeds individual adoption capacity. Stage two turns animals into balls moving through a mechanical sorter; stage three reveals what the abstract symbols stand for.
 
-我选择猫、狗、兔子、仓鼠、鹦鹉和金鱼，使用统一的圆形框与简化矢量图形；暖白、石墨黑和少量琥珀色形成克制的工业视觉。作品不使用血腥画面，也不把动物编号或重新聚成四组。
+I chose cats, dogs, rabbits, hamsters, parrots and goldfish, using circular frames and simple vectors. Warm white, graphite and small amber accents establish a restrained industrial language. I supplied black-and-white animal line-art references and revision directions, and Codex helped draw and adjust the icons. The work avoids graphic violence, numbering animals, or gathering them into four groups.
 
-## 2. 交互如何工作
+## 2. Input, response and feedback
 
-第一阶段的输入是点击：程序移除命中的动物，产生向外消散的黑点，领养数加一。繁殖则让 4–6 只同种动物从原动物中心连续向外运动。用户通过数量、密度和视觉反馈判断自己是否能继续清空。
+Stage one accepts a click, removes the hit animal, disperses black dots and adds one adoption. Reproduction sends four to six same-species offspring continuously out from the parent's centre. Population, density and movement let players judge whether they can keep clearing the screen.
 
-第二阶段的输入是拉杆拖动深度：它决定弹簧压缩量；松手后，活塞与动物刚体碰撞，Matter.js 计算后续重力、反弹与出口。返回发射通道的同一只动物可以重新发射。只有整颗球实际越过判定线，才记录结果并移除刚体。
+Stage two accepts lever depth, which determines spring compression. Releasing it drives a piston into the body, after which Matter.js computes gravity, rebounds and exits. A returned animal can be launched again. Only whole-ball clearance records its result and removes its body.
 
-随后用独立视觉事件完成出口处理。这个区分很重要：真实物理决定动物去了哪里，视觉动画解释机器如何将它“归类”，不能反过来替动物选择出口。全部复位后暂停在“查看结果”页，让观众决定何时继续，而不是被自动倒计时推走。
+The separate visual processing event explains mechanical classification after the physical outcome is known. It must never choose the outcome itself. After every gate has reset, View results lets audiences choose when to continue.
 
-## 3. 实际做过的设计与代码迭代
+## 3. Design and code revisions
 
-- **分裂动画**：早期版本中新动物突然出现在周围，或原动物变成黑点后卡住。我要求保留原动物的大小、颜色与图形，让新动物从原动物的真实中心连续移动到周围；不再用原动物消失来表示繁殖。
-- **拥挤与性能**：采用 Canvas 绘制、可复用 SVG 图形、空间避让与数量上限。新动物出现后推动附近动物向空处移动，不无限增加物理刚体。
-- **结束时机**：达到容量后先禁用领养和新轮次，等已经开始的最后一轮分裂完成，再显示承载过量说明，避免截断动画。
-- **机械装置**：逐步改成纵向板框、交错碰撞钉与底部槽道；缩窄整个发射区、扩大主板，而不是在宽空腔里套一个窄槽。移除了入口止回闸门，允许同一动物返回后再发射。
-- **延迟揭示**：结局图标完整停留 2.5 秒，再转为骷髅。最后将图标、名称、模拟数量和解释放在一起，并明确真实四球记录与整屏模拟不是同一数据。
-- **图标辨识**：先查看 A / B 两套 SVG 预览与小尺寸对照，确认五种 B、鹦鹉 A 后再换正式素材，不用仅换表情的方式区分物种。
-- **完整机械反馈**：为四出口增加深色内腔，真实进入后才开始转化、开盖和掉落；等待合盖再继续。第四只复位后固定显示完成页，手动查看结果，避免截断最后的处理或强迫观众立即进入揭示。
+- **Birth continuity:** early offspring appeared abruptly, or parents became black dots and froze. I requested unchanged parent size, colour and drawing, with offspring moving continuously from its real centre instead of treating reproduction as disappearance.
+- **Crowding and performance:** Canvas, reusable SVG sprites, spacing and a population limit let new animals push neighbours into free space without creating unlimited physical bodies.
+- **Ending stage one:** reaching capacity locks clicks and new waves, but waits for every current birth animation before the explanation.
+- **Apparatus:** a portrait frame, staggered pins and bottom channels replaced earlier layouts. The entire launcher narrowed while the main field widened, rather than nesting a narrow track inside a wide empty chamber. Removing the return gate allowed same-animal relaunch.
+- **Delayed explanation:** outcome symbols remain complete for 2.5 seconds before skulls. The ending combines each symbol, name, simulated count and explanation, while separating four actual ball records from the population simulation.
+- **Recognition:** A/B previews and small-size comparisons preceded the approved five-B/one-A replacement; structural differences, not expressions alone, identify species.
+- **Mechanical feedback:** recessed outlets process an animal only after actual entry. The next animal waits for closing, and the final gate completes before the persistent results prompt.
 
-这些是开发中的实际修订，不代表每一次改动都经过独立真人测试。
+These are real development revisions, not a claim that each received a separate human trial.
 
-## 4. 用户试玩
+## 4. User trials
 
-我邀请了两三位其他人试玩。以下为我对反馈的转述，不是逐字引语；没有公开姓名或录音。
+I invited two or three other people to try the work. The following paraphrases my reported feedback and observations; they are not direct quotations. No names or recordings are published.
 
-| 反馈 / 观察 | 我的设计决定与响应 |
+| Feedback or observation | Decision and response |
 | --- | --- |
-| 第二阶段四个标识的含义不够明确。 | 保留第二阶段仅显示抽象标识的叙事方式，在第三阶段结算中对应展示图标、名称与简短解释，而不是让玩家一直猜测。已有标签基础上，本轮进一步加入逐项说明。 |
-| 第一阶段增长速度需要更快、更不固定，否则玩家与增长过程可能僵持很久。 | 缩短逐轮繁殖间隔并加入有界节奏变化，但保留完整的幼崽动画、错峰、数量上限和最终等待状态，不用瞬间堆出动物来加速。 |
-| 第二阶段玩家容易反复使用相同力度，动物集中进入从左往右第三个出口。 | 先检查相同初始位置与相同力度的重复轨迹；本轮加入装填时的微小位置公差，并在下一只装填时提示上次力度，鼓励探索更浅或更深的拉动。没有设置出口配额或事后改写结果。 |
-| 再次试玩后，我仍感觉大家不太理解完整故事。 | 在最终说明中连接养宠需求、持续繁育、购买力与照护能力有限、可能去向和杠杆隐喻，并明确反对过度繁育。保留疑问式标题和模拟数据限制；尚不能声称改写后已经得到新一轮真人验证。 |
+| The four stage-two symbols were unclear. | I kept them abstract during sorting, but added corresponding names and short explanations at the final reveal so the uncertainty would eventually be resolved. |
+| Growth needed to become faster and less predictable; otherwise clicking could keep pace for too long. | I shortened successive intervals and added bounded timing variation, retaining continuous births, staggering, population limits and the final animation wait. |
+| Similar pulls repeatedly sent balls into the third outlet from the left. | I examined repeated initial conditions, added a small loading tolerance, and displayed the previous pull percentage to encourage shallower/deeper inputs. I did not impose quotas or rewrite recorded exits. |
+| After further play, I still felt that the full story was unclear. | I connected demand, ongoing breeding, limited purchasing/care capacity, possible outcomes and the lever metaphor in the ending. I kept the question and data limitations. I cannot claim a new human trial has validated that rewrite. |
 
-两三人的人数概括来自我早前提供的反馈；后续“故事不清楚”的反馈没有单独记录新人数，不将两次描述相加成总人数。具体试玩日期、精确人数，以及是否完全在解释玩法之前开始，尚未明确记录。提交前我需要按实际情况补充；如当时已解释玩法，应再请至少一位其他人先独立尝试，再记录观察与决定。不公开姓名或录音。
+The two-or-three estimate comes from my earlier account. Later story feedback did not have a separately recorded participant count, so the descriptions are not added together. On 31 October, I confirmed that at least one person tried independently before hearing my explanation. Exact trial dates and participant count were not recorded separately and are not invented; 31 October is the confirmation date.
 
-## 5. 2026-10-26 第一轮：根据反馈实施的修改（历史记录）
+## 5. First feedback-driven pass, 26 October (historical)
 
-### 繁殖节奏
+### Breeding cadence
 
-此前基础间隔从 4.8 秒缩短后固定在 3.2 秒。本轮改为约 4.0 → 3.12 → 2.43 → 2.2 秒，每次排程有 ±14% 的有界变化，最短不低于 2.2 秒；到后期通常落在 2.2–2.51 秒。第七轮之后也沿用压缩后的排程，不回到较长的固定父代窗口。
+An earlier interval had shortened from 4.8 seconds to a fixed 3.2. This pass used approximately 4.0, 3.12, 2.43 and 2.2 seconds, with 14% bounded variation and no interval below 2.2 seconds. Later intervals generally lay between 2.2 and 2.51 seconds; waves after six retained the shortened schedule.
 
-每只幼崽仍用 1.4 秒完成连续位移，窝内仍错峰启动，不叠加多轮队列。第一阶段动物图形、尺寸、领养反馈、容量上限与最后一轮结束条件未改。更快不等于无限生成，也不承诺任何点击速度下都在固定时间结束。
+Offspring still moved continuously for 1.4 seconds with staggered starts and no overlapping wave queues. Animal appearance, size, adoption feedback and the final animation wait were retained. Faster growth did not mean unlimited generation or a guaranteed fixed duration for every player. Later revisions changed the starting interval to 4.4 seconds, as documented above and in README.
 
-### 出口重复
+### Repeated exits
 
-原场景中每只球的起点、质量与场地完全相同。固定步长物理在相同输入下很容易重现同一条路线；单纯换图标不会改变结果。
+Identical starting conditions and pulls can replay a route in fixed-step physics. Changing only the animal drawing cannot address this.
 
-本轮仅在每只动物**装填时**采样最多 ±3.5 个逻辑像素的水平公差，限制在真实发射通道的安全间隙内。松手后不随机改变速度，不在飞行中推球，也不读取过去出口来决定下次结果。重发同一只动物时不重新抽取公差、不复制刚体。记录额外保存 `seatOffsetX`，便于追溯。
+At loading only, each new animal receives up to 3.5 logical pixels of horizontal tolerance within the well's safe clearance. Nothing randomly pushes it during flight or chooses an outlet from previous outcomes. Relaunching the same animal does not resample tolerance or duplicate the body. Records retain `seatOffsetX` for inspection.
 
-同时，下一只装填时显示上次蓄力百分比，提示尝试更浅或更深。力度继续决定弹簧储能，真实出口仍只由实际通过检测决定。
+The next loading also shows the preceding pull percentage to encourage varied depth. Spring energy and real crossings still determine the outcome. This reduces exact replay, rather than guaranteeing equal categories. Repetitions and apparatus bias remain possible. Further concentration should be investigated through recorded inputs and real geometry, not secretly assigned endings.
 
-这是减少“相同力度必然重放同一路径”的处理，不是保证四类均等的抽签系统；重复出口和场地偏向仍可能出现。如果后续试玩仍明显集中，应继续记录力度与出口，优先调整真实碰撞几何，而不是偷偷指定结局。
+## 6. AI tools and my judgment
 
-## 6. AI 工具与我的判断
+See [AI_USAGE.md](AI_USAGE.md) for the full disclosure. ChatGPT / Codex made a substantial contribution to code and documents, not just spelling. Exact underlying model versions and invocation times were not fully recorded and are not reconstructed.
 
-完整使用声明见 [AI_USAGE.md](AI_USAGE.md)。AI 对代码和文档有实质贡献，不只是拼写检查；下面简述我如何作决定。
+Assistance included interaction/file structure, HTML/CSS/JavaScript, SVG/Canvas drawing, Matter.js integration, responsive layout, breeding, bilingual text, automated checks and documentation. My work was defining the subject, visual and narrative direction, observing results, requesting concrete changes and supplying real trial feedback. AI is not a runtime service and receives no player input.
 
-**工具**：ChatGPT / Codex。具体底层模型版本与每次调用耗时没有完整记录，不补填型号或伪造用时。
+**Retained:** AI recommended the more distinctive B icon direction; I kept its cat, dog, rabbit, hamster and goldfish. Shared SVG definitions and separation of rendering/physics and actual/simulated records also remained implementation principles, without claiming AI invented course techniques or my original brief.
 
-**用途**：讨论交互与文件结构；协助编写 HTML、CSS、JavaScript、SVG 与 Canvas 渲染；接入和调试 Matter.js；调整响应式布局、繁殖动画和中英文界面；生成与运行自动检查；协助整理本文、README 与 Credits。
+**Modified:** I selected the A parrot instead of the complete B set. I repeatedly rejected abrupt or stuck birth effects until parents remained unchanged and offspring dispersed continuously. The former eight-second transition was my own earlier requirement, later changed to manual results; it is not presented as an AI-originated suggestion I rejected.
 
-AI 不在作品运行时提供服务。作品不向 AI 发送玩家输入，也不需要在线 AI 模型或密钥。我的主要工作是确定主题、视觉、叙事与修改方向，观察运行效果，提出具体修订，并提供真人试玩反馈。
+Reasonable explanations do not prove correctness. Automated physics checks, browser actions and human trials are distinguished in the records. Earlier feedback does not prove every later version was human-tested.
 
-### 一项保留的 AI 辅助实现
+## 7. Simulation, metaphor and evidence limits
 
-AI 在 A / B 预览后建议以 B 方向强化辨识度。我采用了猫、狗、兔子、仓鼠与金鱼的 B 版；同一 SVG 定义在多个阶段复用。Canvas 显示与 Matter.js 物理分离、真实四球与整屏模拟分开，也保留为实现原则，但不据此声称这些课程技术或我的原始设计说明由 AI 独创。
+`physicalOutcomes` records four actual ball exits. `simulatedFates` uses separate, equally weighted creative parameters for the unadopted snapshot, not real statistics or probabilities inferred from those balls. Adopted animals are excluded. Skulls represent disappearance and invisibility; continued breeding is not death.
 
-### 一项修改 / 拒绝的 AI 辅助实现
+The project does not use a reliable cross-species dataset following unadopted individuals. It therefore makes no claim about actual outcome frequencies or that no related research exists anywhere.
 
-我没有整套照搬推荐的 B 版，而是要求鹦鹉用 A 版。早期“原动物缩成黑点或消失、新动物直接出现”的 AI 辅助繁殖表现也经过反复修改，最终原动物保持不变，新动物连续分散，避免与领养混淆。八秒自动过渡曾是我提出的需求，后来改为手动查看结果；这是我的需求变更，不伪装成拒绝 AI 原创建议的故事。
+## 8. Next steps
 
-### AI 与测试的边界
+Invite another complete START-to-ending trial without explaining first. Observe whether players understand the imbalance, vary pull depth, read outlet processing and understand the final story. Record actual hesitation, actions and decisions rather than assuming everyone understood.
 
-AI 给出合理解释不等于功能正确。本轮将自动物理检查、浏览器操作与真人试玩分别记录在测试文档；修改后的版本还需要真人复测，不能将旧试玩视作新版本已经得到验证。
+Before submission, I should check this account and the credits, then run the full experience from a fresh terminal following README. Anonymous repository/homepage access was checked on 31 October, but is not a complete online playthrough. Unrecorded testing evidence should not be invented.
 
-## 7. 模拟、隐喻与资料限制
-
-四只弹珠的 `physicalOutcomes` 是本轮真实装置记录；整屏 `simulatedFates` 使用单独的等权创作参数，不是现实统计或四球样本推导的真实概率。已领养动物排除在模拟之外。骷髅是消失与不可见性的视觉隐喻，“继续繁育”不等于死亡。
-
-本作品没有采用足以跨物种追踪未领养动物去向的可靠数据，因此没有声称这些结局的现实发生比例，也不声称世界上无人做过任何相关统计。
-
-## 8. 下一步
-
-请试玩者再次从 START 完整体验，先不解释机制，观察是否理解领养与繁育的失衡、是否主动尝试力度、出口处理是否可读，以及点击“查看结果”后的结尾能否说明故事。记录实际犹豫、操作与决定，不先写“玩家都理解了”。
-
-提交前还需由我核对试玩细节、补齐参考来源和许可、按 README 从新终端运行，并检查公开仓库与线上页面。没有记录的资料如实保留为待补，不补造作者、测试或权限。
-
-技术验证与未验证范围见 [tests/TESTING.md](tests/TESTING.md)，引用见 [CREDITS.md](CREDITS.md)。
+See [tests/TESTING.md](tests/TESTING.md) for technical checks and unverified areas, and [CREDITS.md](CREDITS.md) for acknowledgements.

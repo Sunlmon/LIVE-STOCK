@@ -1,25 +1,23 @@
-# Credits / 引用与素材说明
+# Credits
 
-## 第三方代码
+## Third-party code
 
-- **Matter.js 0.20.0**，Liam Brummitt 与贡献者，MIT 许可证。[官方版本源码](https://github.com/liabru/matter-js/tree/0.20.0)。未修改的浏览器构建与完整许可证分别位于 `vendor/matter-0.20.0.min.js`、`vendor/MATTER-LICENSE.txt`；版本来源与校验值见 [vendor/README.md](vendor/README.md)。它负责弹簧活塞、重力与碰撞，不负责决定模拟结局概率。
-- 其余使用浏览器原生 HTML、CSS、JavaScript、Canvas 2D、Pointer Events 和 `localStorage`；测试使用 Node.js 内置测试工具，没有额外 npm 依赖。
+- **Matter.js 0.20.0**, by Liam Brummitt and contributors, under the MIT licence. [Official tagged source](https://github.com/liabru/matter-js/tree/0.20.0). The unchanged browser build is in `vendor/matter-0.20.0.min.js`; the full licence is in `vendor/MATTER-LICENSE.txt`. See [vendor/README.md](vendor/README.md) for provenance and checksum. Matter.js computes the spring, piston, gravity and collisions; it does not set simulated outcome probabilities.
+- Other runtime features use native browser HTML, CSS, JavaScript, Canvas 2D, Pointer Events and `localStorage`. Tests use Node.js's built-in runner, without additional npm dependencies.
 
-## 动物图形与视觉参考
+## Animal graphics and visual work
 
-- 六种动物是为本项目在 `src/animals.js` 中编写的 SVG 线条图形，由作者提出造型与修订方向，Codex 协助实现。最终图形为猫、狗、兔子、圆脸仓鼠、鹦鹉与金鱼，没有使用 emoji 或从参考截图裁出的图片。
-- 2026-10-27 的图标辨识度迭代先制作 A / B 两套代码矢量预览，作者确认五种采用 B、鹦鹉采用 A 后才接入项目。沿用本项目的视觉语言与既有参考背景，不引入图标库、外部图片或在线生成依赖；下方关于早期参考图来源尚未完整确认的说明仍然有效。
-- 造型受作者在开发对话中提供的黑色动物线稿参考图启发。参考图的原作者、原始链接与许可证未完整记录；**不能据此声称参考素材为原创或已经取得授权**。参考截图本身未作为网站素材分发。提交前应尽可能补齐来源与使用权限，不能把“用代码重画”当作许可替代。
-- 纵向弹珠板、交错碰撞钉与底部槽道参考了作者提供的一张传统钉板装置照片。照片未打包进项目，装置由 Canvas 绘制。照片原作者与原始链接同样尚未记录。
-- 两侧动物复用本项目 SVG。金属、亚克力和阴影为 Canvas/CSS 绘制，不使用外部纹理、字体文件或 3D 模型。
-- 当前按钮的视觉参考为作者提供的紫色胶囊按钮截图；在 CSS 中重建为高级灰渐变、高光与光晕，不嵌入或分发原截图。截图原作者与原始链接尚未提供，不能据此声称该参考图为原创或已获得授权。
-- 四类出口图标与骷髅为项目中的矢量绘制；结尾复用同一套出口符号。仓库截图是本项目画面的记录，不包含真人试玩者影像。
+- Six SVG line-art animals are defined in `src/animals.js`: cat, dog, rabbit, round-cheeked hamster, parrot and goldfish. The author directed their forms and revisions; Codex assisted with implementation. They are not emoji or crops from reference screenshots.
+- The 27 October recognition pass produced two code-based vector previews, A and B. After approval, five B animals and the A parrot were integrated. No icon library, external image asset or online generation dependency was introduced.
+- The author supplied black-and-white animal line-art references during development. Codex helped draw and revise the icons according to those references and the author's feedback. Reference images supported visual discussion and are not bundled as website assets.
+- Side decorations reuse the project SVGs. Metal, acrylic and shadow effects are drawn in Canvas/CSS, without external textures, font files or 3D models.
+- The four outlet symbols and skull are vector drawings within the project. The ending reuses the outlet symbols. Repository screenshots record the project itself and do not show trial participants.
 
-## 数据、课程与工具
+## Data, course and tools
 
-- 项目为个人 Assignment 3 “An interactive experience”。课程作业说明约束交互、试玩与过程记录；本项目没有直接复制未修改的课程示例作为作品。若后续发现借用的示例代码，应在此补充具体文件与来源。
-- 四类等权分配是创作模拟参数，不引用或代表真实动物结局数据集。只有四球实际出口属于本轮真实物理记录。
-- ChatGPT / Codex 用于开发协助、测试与文档整理，具体范围、作者决定以及保留 / 修改的建议见 [AI_USAGE.md](AI_USAGE.md) 与 [PROCESS.md](PROCESS.md)。AI 对实现有实质参与；这不是零 AI 使用的项目，也不依赖运行时 AI 服务。
-- 没有使用音频、录像素材、在线图片服务、账号或付费 API；没有上传试玩者姓名、照片或录音。
+- This is an individual project for Assignment 3, **An interactive experience**. The course brief informed interaction, user trials and process documentation. An unchanged course example was not submitted as the work. Any course code subsequently identified as borrowed should receive a specific file and source credit here.
+- Equal weighting across four outcomes is a creative simulation parameter, not a real animal-outcome dataset. Only the four actual ball exits are physical records from the round.
+- ChatGPT / Codex assisted development, tests and documentation. See [AI_USAGE.md](AI_USAGE.md) and [PROCESS.md](PROCESS.md) for scope, author decisions and retained/modified suggestions. AI contributed substantially to implementation but is not a runtime dependency.
+- No audio or video assets, online image service, account system or paid API are used. Trial participants' names, photographs and recordings are not uploaded.
 
-除 Matter.js 明确的 MIT 许可外，本文件不为整个项目或未确认来源的参考图额外授予许可。
+Matter.js retains its MIT licence. This document does not assign an additional open-source licence to the project as a whole.

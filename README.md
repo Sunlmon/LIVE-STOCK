@@ -1,115 +1,121 @@
-# 活体滞销 / LIVE STOCK
+# LIVE STOCK
 
-一件关于宠物过量繁育、有限领养能力与未被选择的生命去向的叙事性互动网页。它先请玩家完成一个简单任务——清空屏幕，再让“清空”从领养行为逐渐转变为机械分流，最后追问：离开画面的生命，后来去了哪里？
+A narrative browser experience about excessive pet breeding, limited adoption capacity, and the lives left unchosen. It begins with an apparently simple instruction: clear the screen. As adoption gives way to mechanical sorting, the work asks where those lives go after they leave our view.
 
-- [在线体验](https://sunlmon.github.io/LIVE-STOCK/)（仓库改名后的 Pages 地址；线上内容取决于实际部署，本次更新不代表已经发布）
-- [源代码仓库](https://github.com/Sunlmon/LIVE-STOCK)
-- [开发过程与用户试玩](PROCESS.md)
-- [AI 使用说明](AI_USAGE.md)
-- [素材与技术引用](CREDITS.md)
+- [Play online](https://sunlmon.github.io/LIVE-STOCK/)
+- [Source repository](https://github.com/Sunlmon/LIVE-STOCK)
+- [Process and user trials](PROCESS.md)
+- [AI usage disclosure](AI_USAGE.md)
+- [Credits](CREDITS.md)
 
-文档核对日期：2026-10-29。当前“本轮分流完成”页固定停留，点击“查看结果”继续；旧版八秒自动跳转已经取消。目录中的过程记录文件为 `PROCESS.md`，不是 `PROGRESS.md`。
+Documentation reviewed on **31 October 2026**. The sorting-completion screen now waits for the player to select **View results**. The previous eight-second automatic transition has been removed. The process record is named `PROCESS.md`, as required by the assignment.
 
-## 给谁使用
+## Intended audience
 
-面向愿意花几分钟参与视觉互动、思考宠物繁育与消费问题的普通观众，不要求编程经验。作品以电脑鼠标操作为主，支持窗口缩放与中文 / English 切换。
+The work is for general audiences willing to spend a few minutes exploring an interaction about pet breeding and consumption. No programming knowledge is required. It is designed primarily for a desktop mouse, supports resizing, and provides Chinese and English interfaces.
 
-## 主要互动
+## Main interaction
 
-1. **领养与繁殖**：点击 START，然后点击猫、狗、兔子、仓鼠、鹦鹉和金鱼。图标采用经作者确认的特征强化 B 版（鹦鹉为 A 版），以耳型、脸型和完整鱼身增强辨识度，不改变圆圈尺寸。每次领养让一只动物化为黑色小点消散，并增加领养数；幸存动物不断生成同种新动物，幼崽从原动物中心连续向外移动。
-2. **承载过量**：每轮开始时随机选择 **550–580 只**之间的整数作为结束点，本轮中保持不变。达到这个数量后，立即停止领养及新一轮繁殖，等待已经开始的最后一轮动画完成，再显示容量说明。密度条不提前结束；只有点击“确认”（英文 Confirm）才继续，没有自动倒计时或按钮下方提示文字。
-3. **物理分流**：向下拖动右下角拉杆，越过金色刻度后松开。弹簧推动活塞，由真实碰撞发射动物。拖动深度影响力度；一共四只动物。整颗动物越过实际出口判定线后，才记录结果并以独立画面完成约 1.3 秒的“进入内腔—转为原出口符号—开盖—掉落—复位”；复位后装填下一只。动物若返回发射通道，可再次发射同一只，不多消耗动物名额。第四只完成全部处理后，装置淡出，显示“本轮分流完成 / Sorting complete”和“查看结果 / View results”按钮。淡入完成后按钮才启用，页面固定停留，不再倒计时；点击按钮才进入原结尾揭示。
-4. **结尾揭示**：未被领养动物的快照停止、褪色、转成结局符号，符号完整停留 2.5 秒，再转为骷髅并逐个消散。以“看不见的滞销动物，去了哪里？”为题，用简短的中英文叙事解释购买力与繁育失衡、拉杆的命运隐喻，以及停止过度繁育的倡议。四个抽象标识仍对应文字解释，数据明确标注“本轮模拟结果”，可以重新开始；不将骷髅隐喻解释为所有动物必然死亡。
+1. **Adoption and reproduction.** Select START and click cats, dogs, rabbits, hamsters, parrots and goldfish. Each adoption removes one animal, disperses small black particles, and increases the adoption counter. Remaining animals reproduce: new animals move continuously out from their parent's centre. Five animal icons use the approved feature-emphasising B direction; the parrot uses direction A.
+2. **Capacity exceeded.** Each round samples one integer between **550 and 580** as its stopping population. On reaching it, adoption and new breeding stop immediately. Birth animations already underway finish before the capacity explanation appears. Density alone does not end the stage early. Select **Confirm** to continue; there is no countdown or automatic advance.
+3. **Physical sorting.** Pull the lower-right lever down past its gold mark and release. A spring drives a piston into an animal; Matter.js computes gravity, collisions and rebounds. Pull depth affects launch strength. There are **four distinct animals**, rather than a limit of four lever releases: an animal returning to the open launch well can be launched again without consuming another animal. A result is recorded only after the whole ball crosses a real outlet line. An independent visual sequence then shows arrival, transformation into the existing outlet symbol, opening, falling and closing, over approximately **1.3 seconds**. The next animal loads after this finishes. After the fourth sequence, the machine fades out and **Sorting complete** appears. **View results** becomes available after the fade-in; the page waits indefinitely for that action.
+4. **The reveal.** The unadopted population snapshot stops, fades, and becomes outcome symbols. Completed symbols remain visible for **2.5 seconds**, then become skulls and disappear individually. The ending asks where unseen, unsold animals go, explains the lever metaphor and the imbalance between continued breeding and limited demand, and argues against overbreeding. Each outcome symbol receives a written explanation. Figures are explicitly labelled as simulated results, and the player can restart. The skull is a metaphor, not a claim that every animal dies.
 
-![高级灰渐变胶囊按钮](screenshots/capsule-cover-desktop.png)
+![Grey capsule START button](screenshots/capsule-cover-desktop.png)
 
-![已确认的五种 B 版动物与 A 版鹦鹉](screenshots/selected-icons-stage-one.png)
+![Approved B animal icons and A parrot](screenshots/selected-icons-stage-one.png)
 
-![随机数量结束后的确认页](screenshots/capsule-confirmation.png)
+![Capacity confirmation](screenshots/capsule-confirmation.png)
 
-![真实物理弹珠装置与紧凑胶囊控件](screenshots/capsule-physics-desktop.png)
+![Physical sorting apparatus](screenshots/capsule-physics-desktop.png)
 
-![出口内腔中的动物到符号转化](screenshots/outlet-processing-transform.png)
+![Animal-to-symbol transformation inside an outlet](screenshots/outlet-processing-transform.png)
 
-![开盖后符号向下掉落](screenshots/outlet-processing-drop.png)
+![Symbol falling through the open outlet](screenshots/outlet-processing-drop.png)
 
-![固定停留的分流完成页与查看结果按钮](screenshots/physics-completion.png)
+![Sorting-completion page with View results](screenshots/physics-completion.png)
 
-![第三阶段结算与出口说明](screenshots/capsule-ending-desktop.png)
+![Ending with outcome explanations](screenshots/capsule-ending-desktop.png)
 
-## 如何运行
+## Run locally
 
-这是原生 HTML、CSS、JavaScript 与 Canvas 2D 项目，**不需要 npm、构建步骤、付费账户或 API key**。唯一的第三方运行依赖是已保存在 `vendor/` 的 Matter.js 0.20.0，附完整 MIT 许可证；不需要运行时访问 CDN。请保留 `src/` 与 `vendor/`，不要只下载 `index.html`。
+This is a native HTML, CSS, JavaScript and Canvas 2D project. **No npm installation, build step, paid account or API key is required.** Matter.js **0.20.0**, the only third-party runtime library, is included in `vendor/` with its full MIT licence. No runtime CDN access is needed. Keep `src/` and `vendor/`; downloading only `index.html` is insufficient.
 
-Windows：在项目根目录打开 PowerShell，执行：
+On Windows, open PowerShell in the project root and run:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\serve.ps1
 ```
 
-打开 <http://localhost:8000/>，按 START。保持终端运行，结束时按 `Ctrl+C`。该命令只为本次服务器进程设置执行策略，不要求永久降低系统策略。若提示脚本不存在，请确认终端位于包含 `serve.ps1` 的目录；若端口被占用，先检查是否已启动本项目服务器，不要重复启动。
+Open <http://localhost:8000/> and select START. Leave the terminal running; press `Ctrl+C` to stop the server. This command sets the execution policy for that server process only. If the script is not found, check that the terminal is in the folder containing `serve.ps1`. If port 8000 is occupied, check whether this project's server is already running.
 
-其他系统：使用能将 `.js` 作为 JavaScript 提供的静态 HTTP 服务器，以本项目根目录为网站根目录。例如已安装 Python 3 时，可运行 `python3 -m http.server 8000`，再打开同一网址；Python 只是可选的服务方式，不是游戏依赖。不要通过 `file://` 双击打开；浏览器需要通过 HTTP 加载 ES 模块。
+On other systems, use a static HTTP server rooted in this directory that serves `.js` as JavaScript. For example, if Python 3 is already installed:
 
-可选开发入口（不代替完整流程）：
+```bash
+python3 -m http.server 8000
+```
 
-- `/?stage=physics`：直接检查弹珠互动，以 45 只初始动物保存样本。
-- `/?stage=capacity`：直接检查承载过量说明，同样只使用初始样本。
+Python is an optional way to serve files, not a game dependency. Do not open the project through `file://`; the browser needs HTTP to load ES modules.
 
-## 状态、反馈与异常
+Optional development shortcuts, which do not replace the full experience:
 
-- 第一阶段右上角显示屏幕数量、已领养数量与密度；领养对象即时移除，不能重复计数。
-- 繁殖基础间隔约为 4.4 → 3.61 → 2.96 → 2.43 → 2.2 秒，单轮加入 ±14% 的有界变化，实际间隔不低于 2.2 秒；后期通常为 2.2–2.51 秒。幼崽位移动画仍为 1.4 秒，不叠加多轮队列。每轮数量上限仅在开始时采样一次，切换语言、领养、繁殖及重试物理不会重抽；重新开始重新采样，两轮可能偶然相同。最后不足一窝时按剩余空位生成并完整播放动画，临近上限每窝仍检查即时容量。玩家操作影响体验时长，不保证固定耗时。
-- 所有页面按钮统一为高级灰渐变胶囊：主体由 `#62645F` 过渡至 `#A7A9A3`，暖白居中文字、边缘高光与克制的灰色光晕。START 约 210×56px，确认和结尾重开约 210×54px，主要按钮宽高均缩至上一版的一半；窄屏高度最低 44px。顶部工具控件进一步收紧，保留 10–11px 可读字号，语言选择以外缘细环区分。容量说明页的操作区只保留“确认 / Confirm”，不再有重新开始；装置页的重开和错误重试仍保留。没有箭头或额外图标，hover 约放大 1.02 倍、按下缩至 0.98 倍，过渡 180–220ms。开启“减少动态效果”时过渡缩短。暖白背景与其他开场元素保留，支持鼠标和原生键盘激活。
-- 拉杆未过刻度、取消拖动、失去焦点或拖动时改变窗口，都不会意外消耗发射次数。上一只完成后会提示上次蓄力百分比，鼓励尝试不同力度。
-- 弹珠装填位置有最多 ±3.5 个逻辑像素的初始公差，始终在真实通道内。飞行中不添加随机推力、不改出口，也不强制四类齐全。相同力度可能产生不同结果，也仍可能重复同一出口。
-- 整颗球越过出口判定线后才记录一次、移除刚体，并让对应出口边缘短闪约 360ms。之后的转化、开盖和掉落不再参与物理，也不会二次记录；处理期间暂不装填下一只，盖片不增加碰撞体。四只全部处理完才冻结机器并进入完成提示，不能提前打断动画或发射第五只。
-- 物理库缺失、越界或运动超时有提示和重试；异常不会被编造为出口结果。返回通道后等待用户再次操作不算飞行超时。
-- 语言按钮不重置游戏；语言偏好保存在本机 `localStorage`，被禁用时仍可临时切换。没有账号、排行榜、远程数据库或分析追踪。
+- `/?stage=physics`: open the apparatus with a snapshot of the 45 initial animals.
+- `/?stage=capacity`: open capacity confirmation with the same initial sample.
 
-## 模拟数据不是现实统计
+## Feedback and interruption handling
 
-`physicalOutcomes` 只记录四只代表动物真正进入的出口。`simulatedFates` 则为整屏未领养快照独立分配创作结局，目前四类等权，**不是现实概率或调查数据，也不是从四只弹珠推算出来的比例**。已领养动物不参与模拟。某类可以为零，不强制补齐；骷髅是视觉隐喻，“继续繁育”不等同于死亡。
+- Stage one displays population, adoption count and density. Adoption removes its target immediately and cannot count it twice.
+- Breeding intervals shorten approximately from 4.4 to 3.61, 2.96, 2.43 and 2.2 seconds, with bounded variation of 14% and a 2.2-second minimum. Birth movement lasts 1.4 seconds, with staggered starts and no overlapping wave queues. A final partial litter fills remaining places without skipping its animation. Play duration depends on input, rather than a promised fixed time.
+- The population limit is sampled once per round. Adoption, language changes and physics retry do not resample it; a full restart does. Two rounds may coincidentally have the same limit.
+- Grey gradient capsule buttons use warm-white centred labels, restrained highlights and shadows, and subtle hover/press feedback. START is approximately 210 by 56 CSS pixels; Confirm and ending restart are approximately 210 by 54, with a 44-pixel minimum height on narrow screens. Tool controls remain compact. Reduced-motion preferences shorten transitions. Capacity confirmation has only Confirm; apparatus restart and error retry remain available.
+- A below-threshold pull, cancelled drag, lost focus or resize while pulling does not accidentally consume an animal. The previous pull percentage encourages trying another depth.
+- Each animal loads with a bounded horizontal tolerance of up to 3.5 logical pixels inside the real well. No random force is applied during flight, no outlet is rewritten, and no quota forces four different outcomes. Repeated exits remain possible.
+- Whole-ball clearance records an outcome once and removes its body. The outlet rim flashes for about 360 milliseconds, then returns to normal. Subsequent transformation and gate movement are visual only. The next animal waits for gate reset, and the fourth sequence finishes before the machine freezes. A fifth animal cannot be launched.
+- Missing physics code, boundary failures and flight timeouts produce recoverable errors rather than invented results. Waiting for the player after a natural return is not counted as flight timeout.
+- Language switching does not reset play. Only the language preference is stored in local `localStorage`; switching still works temporarily if storage is unavailable. There is no account, leaderboard, remote database or analytics tracking.
 
-本作品没有采用能够覆盖这些宠物种类并持续追踪未领养个体去向的可靠数据；这里表达的是一个问题，而不是关于真实发生频率的结论。
+## Simulation is not real-world statistics
 
-## 实现位置
+`physicalOutcomes` contains the actual outlet records of the four representative animals. `simulatedFates` independently assigns creative outcomes to the unadopted population snapshot, using equal weights for four categories. **These are not measured probabilities, survey results, or proportions inferred from four balls.** Adopted animals are excluded. A category may receive zero animals; none is forcibly populated. Continued breeding is not equivalent to death.
 
-- `src/main.js`、`src/state.js`：输入、阶段切换、快照与重置。
-- `src/animals.js`、`src/breeding.js`、`src/packing.js`、`src/particles.js`：六种矢量图形、繁殖、避让、领养反馈。
-- `src/physics-stage.js`：Matter.js 世界、弹簧、四只动物与真实出口记录。
-- `src/physics-renderer.js`、`src/physics-materials.js`、`src/physics-viewport.js`：工业装置材质、响应式视口和交互坐标映射。
-- `src/outlet-processing.js`：出口视觉状态与 1.3 秒节奏；`src/physics-completion.js`：机器淡出、完成页淡入、手动查看结果与重复确认保护。均不决定真实物理出口。
-- `src/reveal.js`、`src/i18n.js`、`src/styles.css`：揭示动画、双语文字与页面样式。
-- `src/config.js`：动物尺寸、繁殖节奏、数量保护及物理参数。
+The work does not use a reliable dataset tracing the outcomes of unadopted individuals across all these species. It poses a question rather than claiming real-world frequencies.
 
-## 测试
+## Code map
 
-运行作品不需要 Node.js；开发者执行自动测试时需要 Node.js（本轮使用 24）：
+- `src/main.js`, `src/state.js`: input, stage changes, snapshots and restart.
+- `src/animals.js`, `src/breeding.js`, `src/packing.js`, `src/particles.js`: SVG animals, reproduction, spacing and adoption feedback.
+- `src/physics-stage.js`: Matter.js world, spring, four animals and actual outlet records.
+- `src/physics-renderer.js`, `src/physics-materials.js`, `src/physics-viewport.js`: apparatus rendering, materials, responsive fit and pointer mapping.
+- `src/outlet-processing.js`: the 1.3-second visual sequence. `src/physics-completion.js`: machine fade, completion page and guarded manual confirmation. Neither determines physical outcomes.
+- `src/reveal.js`, `src/i18n.js`, `src/styles.css`: reveal, bilingual text and styling.
+- `src/config.js`: adjustable sizes, timing, population limits and physics parameters.
+
+## Verification
+
+Node.js is only needed for developer tests, not for playing. Tests were run with Node.js 24:
 
 ```powershell
 node --test tests/*.test.mjs
 ```
 
-2026-10-29 重新运行：**72 项通过，0 失败**。此前 Chrome 检查覆盖真实发射、返回重发、出口处理、等待 20 秒不自动继续、鼠标与 Enter 查看结果、双语、四种窗口与原结尾重开；实际验证范围、复测步骤与限制见 [tests/TESTING.md](tests/TESTING.md)。本次文档整理没有重新进行浏览器全流程或真人试玩，不能把旧记录写成新的验证。
+On **31 October 2026**, **72 tests passed, with no failures**. Earlier Chrome checks covered real launches, returns and relaunches, outlet processing, a 20-second wait without automatic advance, mouse and Enter confirmation, both languages, four viewport sizes and the original reveal/restart flow. See [tests/TESTING.md](tests/TESTING.md) for dated evidence and limitations. This documentation pass did not repeat a full browser playthrough or a human trial.
 
-## AI 使用与创作责任
+## AI usage and authorship
 
-ChatGPT / Codex 对方案讨论、SVG、较大范围的代码实现与调试、双语文字、自动检查和文档整理有实质参与，不只是拼写检查。主题、视觉参考选择、核心故事及最终修订方向由作者提供与确认。
+ChatGPT / Codex contributed substantially to implementation, debugging, SVGs, translation, tests and documentation. Its role was not limited to spelling checks. The author supplied and approved the theme, story, visual references and revisions, including selecting five B icons with the A parrot and correcting the reproduction animation. See [PROCESS.md](PROCESS.md) and [AI_USAGE.md](AI_USAGE.md).
 
-作者在 AI 推荐的 B 版动物方向上采用五种 B、鹦鹉 A 的混选；多次要求修正突兀或卡住的繁殖动画，并将完成页改为手动查看结果。这些选择与实际试玩反馈见 [PROCESS.md](PROCESS.md)，工具用途、保留与修改的建议、贡献边界见 [AI_USAGE.md](AI_USAGE.md)。
+The author supplied black-and-white animal line-art references during development; Codex assisted with drawing and revisions. AI is not used at runtime, and player input is not sent to AI services. Automated checks are not human trials. Exact model versions, invocation times and contribution percentages were not fully recorded and are not invented here.
 
-游戏运行时没有 AI 服务，不需要 AI 账户或密钥，也不向 AI 发送玩家输入。自动化检查不是真人试玩；图形由代码重画也不替代素材许可。具体模型版本、调用时间与 AI 贡献比例未完整记录，不作补造。
+## Known limitations
 
-## 已知限制
+- Desktop-first interaction; responsive geometry does not establish comfortable physical-phone touch use. There is no audio or keyboard alternative to the lever.
+- Four balls are a small sample, not an evenly balanced lottery. The apparatus may favour some exits; repeated outcomes are valid.
+- Neither a few human trials nor automated physics samples establish general user behaviour or real animal outcomes.
+- Refreshing clears game progress. Only language preference persists.
+- Safari, Firefox, physical phones, long sessions and performance on other machines require further checking. Controlled animation clocks are not frame-rate benchmarks.
 
-- 桌面优先；窄屏可保留结构，但不保证实体手机的触摸体验。没有声音，也没有键盘替代拉杆操作。
-- 有限的四球样本不应表现为“均匀抽签”；物理装置可能有偏向，相同出口重复出现不是记录错误。
-- 不能根据两三位试玩者或自动物理样本推断真实用户总体体验，更不能推断现实动物去向。
-- 游戏数据只存于当前会话，刷新即清除；仅语言偏好会保留。
-- 跨浏览器、实体手机与长期性能仍需要进一步检查；自动时钟测试不是帧率基准。
-- 参考图的原作者及原始链接未完整记录，详见 Credits。未把这些参考图片打包为网站素材。
+## Submission and sharing
 
-## 提交与分享
+Keep code, assets, README, PROCESS, AI disclosure and credits in the author's public repository with its real development history. Submit the **repository URL** on Canvas; the live link is supplementary. Updates require a commit, push and successful Pages deployment.
 
-将源代码、必要素材、README、PROCESS、AI 使用说明与 Credits 保存在个人公开仓库，保留真实的开发提交历史。在 Canvas 提交**仓库链接**；在线试玩地址供老师与观众体验，但不能替代仓库提交。发布更新需要自行 commit、push 并等待 GitHub Pages 部署；本轮本地修改不会自动更新线上版本。本地远程地址已经指向 `Sunlmon/LIVE-STOCK.git`；本轮网络读取未能确认线上与本地同步，不据此声称部署已更新。
+An anonymous check on 31 October confirmed that the repository was public and the live homepage accessible, and that the online AI disclosure matched the local version before the documentation review. This does not establish a complete online playthrough or mean the present English documents have already been pushed.
